@@ -8,7 +8,8 @@ export async function getCertificates(): Promise<Certificate[]> {
   const { data, error } = await supabase
     .from('certificates')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(100);
 
   if (error) {
     console.error('Error fetching certificates:', error);
@@ -88,7 +89,8 @@ export async function getCourses(): Promise<Course[]> {
   const { data, error } = await supabase
     .from('courses')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   if (error) {
     console.error('Error fetching courses:', error);
@@ -172,7 +174,8 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
   const { data, error } = await supabase
     .from('blogs')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(10);
 
   if (error) {
     console.error('Error fetching blogs:', error);
@@ -237,7 +240,8 @@ export async function getDiscounts(): Promise<Discount[]> {
   const { data, error } = await supabase
     .from('discounts')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(20);
 
   if (error) {
     console.error('Error fetching discounts:', error);

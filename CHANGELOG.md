@@ -7,9 +7,11 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **Security**: Added RLS policies for `site_settings` and `discounts` tables in Supabase.
 - **Database**: Added `price` and `original_price` columns to `courses` table.
+- **Infrastructure**: Added Next.js Edge Middleware for rate limiting on `/admin/login` and `/verify` routes.
 
 ### Changed
 - **Data Layer**: Updated `getCourses` in `data-service.ts` to fetch from Supabase instead of local JSON.
+- **Security**: Hardened database queries in `data-service.ts` by adding `.limit()` constraints to public `SELECT` queries.
 
 ## [Unreleased] - 2026-05-16
 
