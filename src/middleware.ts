@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
   const windowMs = 60 * 1000 // 1 minute
 
   if (url === '/admin/login') {
-    limit = 5
+    limit = 30
   } else if (url === '/verify') {
     limit = 20
   } else {

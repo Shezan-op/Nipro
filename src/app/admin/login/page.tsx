@@ -47,7 +47,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B0D17] relative overflow-hidden">
+    <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center relative overflow-hidden">
       {/* Background Glows */}
       <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-nipro-red/10 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>

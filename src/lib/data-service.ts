@@ -22,6 +22,8 @@ export async function getCertificates(): Promise<Certificate[]> {
     searchAlias: cert.search_alias,
     courseName: cert.course_name,
     issueDate: cert.issue_date,
+    joiningDate: cert.joining_date,
+    completionDate: cert.completion_date,
     imageUrl: cert.image_url,
     pdfUrl: cert.pdf_url,
     status: cert.status as 'Active' | 'Inactive'
@@ -30,18 +32,19 @@ export async function getCertificates(): Promise<Certificate[]> {
 
 export async function getCertificateById(id: string): Promise<Certificate | null> {
   const supabase = await getSupabaseClient();
+  // Use case-insensitive search across id and search_alias
   const { data, error } = await supabase
     .from('certificates')
     .select('*')
-    .or(`id.eq.${id},search_alias.eq.${id}`)
-    .single();
+    .or(`id.ilike.${id},search_alias.ilike.${id}`)
+    .maybeSingle();
 
   if (error) {
-    if (error.code !== 'PGRST116') {
-      console.error('Error fetching certificate:', error);
-    }
+    console.error('Error fetching certificate:', error);
     return null;
   }
+
+  if (!data) return null;
 
   return {
     id: data.id,
@@ -49,6 +52,8 @@ export async function getCertificateById(id: string): Promise<Certificate | null
     searchAlias: data.search_alias,
     courseName: data.course_name,
     issueDate: data.issue_date,
+    joiningDate: data.joining_date,
+    completionDate: data.completion_date,
     imageUrl: data.image_url,
     pdfUrl: data.pdf_url,
     status: data.status as 'Active' | 'Inactive'
@@ -65,10 +70,32 @@ export async function addCertificate(cert: Certificate): Promise<void> {
       search_alias: cert.searchAlias || cert.fullName.split(' ')[0],
       course_name: cert.courseName,
       issue_date: cert.issueDate,
+      joining_date: cert.joiningDate || null,
+      completion_date: cert.completionDate || null,
       image_url: cert.imageUrl,
       pdf_url: cert.pdfUrl,
       status: cert.status
     }]);
+
+  if (error) throw error;
+}
+
+export async function updateCertificate(id: string, cert: Partial<Certificate>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase
+    .from('certificates')
+    .update({
+      full_name: cert.fullName,
+      search_alias: cert.searchAlias,
+      course_name: cert.courseName,
+      issue_date: cert.issueDate,
+      joining_date: cert.joiningDate || null,
+      completion_date: cert.completionDate || null,
+      image_url: cert.imageUrl,
+      pdf_url: cert.pdfUrl,
+      status: cert.status
+    })
+    .eq('id', id);
 
   if (error) throw error;
 }

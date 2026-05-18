@@ -28,6 +28,8 @@ export interface Certificate {
   searchAlias?: string;
   courseName: string;
   issueDate: string;
+  joiningDate?: string;
+  completionDate?: string;
   imageUrl?: string;
   pdfUrl?: string;
   status: 'Active' | 'Inactive';

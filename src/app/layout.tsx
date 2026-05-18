@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/sonner";
+import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,11 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased min-h-screen flex flex-col`}>
-        <Navbar />
-        <main className="flex-grow">
+        <LayoutWrapper navbar={<Navbar />} footer={<Footer />}>
           {children}
-        </main>
-        <Footer />
+        </LayoutWrapper>
         <Toaster position="top-center" />
       </body>
     </html>

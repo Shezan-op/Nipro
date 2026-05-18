@@ -29,6 +29,8 @@ export default function AdminCertificates() {
     fullName: '',
     courseName: '',
     issueDate: new Date().toISOString().split('T')[0],
+    joiningDate: '',
+    completionDate: '',
     status: 'Active',
     imageUrl: '',
     pdfUrl: ''
@@ -100,6 +102,8 @@ export default function AdminCertificates() {
           fullName: '',
           courseName: '',
           issueDate: new Date().toISOString().split('T')[0],
+          joiningDate: '',
+          completionDate: '',
           status: 'Active',
           imageUrl: '',
           pdfUrl: ''
@@ -197,6 +201,24 @@ export default function AdminCertificates() {
                   className="h-12 border-gray-200"
                 />
               </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Joining Date <span className="text-gray-400 font-normal normal-case">(optional)</span></label>
+                <Input 
+                  type="date"
+                  value={newCert.joiningDate || ''}
+                  onChange={e => setNewCert({...newCert, joiningDate: e.target.value})}
+                  className="h-12 border-gray-200"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Completion Date <span className="text-gray-400 font-normal normal-case">(optional)</span></label>
+                <Input 
+                  type="date"
+                  value={newCert.completionDate || ''}
+                  onChange={e => setNewCert({...newCert, completionDate: e.target.value})}
+                  className="h-12 border-gray-200"
+                />
+              </div>
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Certificate File (PDF or Image)</label>
                 <div className="flex items-center gap-4">
@@ -259,6 +281,7 @@ export default function AdminCertificates() {
                   <th className="px-6 py-4">Certificate ID</th>
                   <th className="px-6 py-4">Student Name</th>
                   <th className="px-6 py-4">Course</th>
+                  <th className="px-6 py-4">Joining Date</th>
                   <th className="px-6 py-4">Issue Date</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Actions</th>
@@ -296,6 +319,9 @@ export default function AdminCertificates() {
                         <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-md">
                           {cert.courseName}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground font-medium">
+                        {cert.joiningDate || <span className="text-gray-300 italic">—</span>}
                       </td>
                       <td className="px-6 py-4 text-sm text-muted-foreground font-medium">
                         {cert.issueDate}

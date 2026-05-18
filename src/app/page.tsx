@@ -1,21 +1,24 @@
 import { Hero } from "@/components/home/Hero";
 import { FeaturedCourses } from "@/components/home/FeaturedCourses";
-import { CertificateSearch } from "@/components/home/CertificateSearch";
 import { TestimonialMarquee } from "@/components/home/TestimonialMarquee";
 import { PromotionalBanner } from "@/components/home/PromotionalBanner";
 import { TrustGallery } from "@/components/home/TrustGallery";
 import { BlogCard } from "@/components/home/BlogCard";
-import { getCourses, getBlogPosts, BlogPost } from "@/lib/data-service";
+import { getCourses, getBlogPosts, getSiteSettings, BlogPost } from "@/lib/data-service";
 import { Laptop, ShieldCheck, Globe, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default async function Home() {
-  const courses = await getCourses();
-  const blogs = await getBlogPosts();
-  
-  // Hidden Offer Logic
-  const isOfferActive = true;
+  const [courses, blogs, settings] = await Promise.all([
+    getCourses(),
+    getBlogPosts(),
+    getSiteSettings(),
+  ]);
+
+  // Only show the promotional banner if the is_offer_active flag is strictly true
+  const isOfferActive = (settings as unknown as Record<string, unknown>)?.is_offer_active === true;
+
 
   return (
     <div className="flex flex-col">

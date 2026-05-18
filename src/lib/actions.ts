@@ -8,6 +8,7 @@ import {
   getCertificates as getCertificatesFromDb,
   getSiteSettings,
   addCertificate as addCertificateToDb,
+  updateCertificate as updateCertificateInDb,
   deleteCertificate as deleteCertificateFromDb,
   saveCourses as saveCoursesToDb,
   saveBlogs as saveBlogsToDb,
@@ -53,6 +54,18 @@ export async function deleteCertificate(id: string) {
   } catch (error) {
     console.error('Failed to delete certificate:', error);
     return { success: false, error: 'Failed to delete certificate' };
+  }
+}
+
+export async function updateCertificateAction(id: string, cert: Partial<Certificate>) {
+  try {
+    await updateCertificateInDb(id, cert);
+    revalidatePath('/admin/certificates');
+    revalidatePath('/verify');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update certificate:', error);
+    return { success: false, error: 'Failed to update certificate' };
   }
 }
 

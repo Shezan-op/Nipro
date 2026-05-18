@@ -46,7 +46,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
   return (
     <div className={cn(
       "bg-slate-900 h-screen fixed left-0 top-0 text-white flex flex-col transition-all duration-300 z-50",
-      isCollapsed ? "w-20" : "w-64"
+      isCollapsed ? "w-16" : "w-64"
     )}>
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         {!isCollapsed && (

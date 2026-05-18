@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# --- USER CUSTOM FILES ---
+# Add custom files/folders to ignore below this line:
+
+# Project specific notes and design specs
+claudeey_universal_design_engine.md
+Courses-list.md
+Details.md
+Current-progress.md
+NIPRO_DESIGN_SPEC.md
+
+# OS/IDE generated files
+.DS_Store
+.vscode/
+.idea/
