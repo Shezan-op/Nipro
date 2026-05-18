@@ -1,0 +1,52 @@
+[
+  {
+    "id": "dca",
+    "title": "Diploma in Computer Application (DCA)",
+    "description": "Master essential computer applications and office tools to kickstart your corporate career.",
+    "originalPrice": 3999,
+    "discountedPrice": 1699,
+    "duration": "6 Months",
+    "image": "/images/basics.png",
+    "category": "Applications"
+  },
+  {
+    "id": "tally",
+    "title": "Tally ERP & Prime",
+    "description": "Become a professional accountant. Learn GST, inventory management, and financial accounting with Tally.",
+    "originalPrice": 3999,
+    "discountedPrice": 1699,
+    "duration": "3 Months",
+    "image": "/images/accounting.png",
+    "category": "Accounting"
+  },
+  {
+    "id": "web-design",
+    "title": "Diploma in Graphic Web Designing & Development",
+    "description": "Build stunning websites and graphics. Master the art of visual communication and frontend code.",
+    "originalPrice": 4999,
+    "discountedPrice": 2499,
+    "duration": "6 Months",
+    "image": "/images/designing.png",
+    "category": "Design"
+  },
+  {
+    "id": "python",
+    "title": "Certificate in Computer Python Programming",
+    "description": "Learn the world's most popular programming language. Build a foundation for data science and AI.",
+    "originalPrice": 2999,
+    "discountedPrice": 1299,
+    "duration": "2 Months",
+    "image": "/images/programming.png",
+    "category": "Programming"
+  },
+  {
+    "id": "digital-marketing",
+    "title": "Diploma in Digital Marketing",
+    "description": "Grow businesses online. Learn SEO, social media marketing, and run profitable ad campaigns.",
+    "originalPrice": 4999,
+    "discountedPrice": 1999,
+    "duration": "4 Months",
+    "image": "/images/basics.png",
+    "category": "Marketing"
+  }
+]

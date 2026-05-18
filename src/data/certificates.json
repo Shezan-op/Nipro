@@ -1,0 +1,32 @@
+[
+  {
+    "id": "221067",
+    "fullName": "Mohammed Raheem Ahmed Khan",
+    "searchAlias": "Raheem",
+    "courseName": "Tally Accounting",
+    "issueDate": "2026-01-01",
+    "imageUrl": "/certificates/sample.png",
+    "pdfUrl": "/certificates/sample.pdf",
+    "status": "Active"
+  },
+  {
+    "id": "221068",
+    "fullName": "Srinivas Rao",
+    "searchAlias": "Srinivas",
+    "courseName": "MS Office",
+    "issueDate": "2026-02-15",
+    "imageUrl": "/certificates/sample.png",
+    "pdfUrl": "/certificates/sample.pdf",
+    "status": "Active"
+  },
+  {
+    "id": "221069",
+    "fullName": "Fatima Begum",
+    "searchAlias": "Fatima",
+    "courseName": "DTP",
+    "issueDate": "2026-03-10",
+    "imageUrl": "/certificates/sample.png",
+    "pdfUrl": "/certificates/sample.pdf",
+    "status": "Active"
+  }
+]

@@ -1,0 +1,43 @@
+"use client";
+
+import React from 'react';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { Course } from '@/lib/types';
+import { CourseCard } from '@/components/courses/CourseCard';
+
+interface FeaturedCoursesProps {
+  courses: Course[];
+}
+
+export function FeaturedCourses({ courses }: FeaturedCoursesProps) {
+  return (
+    <section className="bg-gray-50 py-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-nipro-blue sm:text-4xl mb-4">
+              Explore Our <span className="text-nipro-red">Top Courses</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Pick the skill you want, learn at your pace, and walk out with a recognised certificate. It&apos;s that simple.
+            </p>
+          </div>
+          <Button asChild variant="ghost" className="text-nipro-red font-bold hover:text-nipro-red hover:bg-nipro-red/5">
+            <Link href="/courses">
+              Browse All Courses
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {courses.slice(0, 3).map((course, index) => (
+            <CourseCard key={course.id} course={course} index={index} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

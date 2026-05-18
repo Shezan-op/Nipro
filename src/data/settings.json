@@ -1,0 +1,31 @@
+{
+  "institute": {
+    "name": "Nipro Computer Education",
+    "fullName": "Nipro Computer Education Institute",
+    "tagline": "Learn Skills. Get Certified. Build Your Future.",
+    "recognition": "Registered and recognised by the Government of Andhra Pradesh and Telangana",
+    "location": "Bhatindi, Jammu",
+    "mapLink": "https://maps.app.goo.gl/zvVd6xggBsU5WrWH9",
+    "languages": ["English", "Telugu", "Hindi", "Urdu"],
+    "modes": ["Offline", "Online"]
+  },
+  "contact": {
+    "phone": "+91 90000 00000",
+    "whatsapp": "+91 90000 00000",
+    "email": "info@niprocomputereducation.com",
+    "address": "Nipro Computer Education, Bhatindi, Jammu",
+    "officeHours": "Monday to Saturday, 9:00 AM to 6:00 PM",
+    "weeklyHoliday": "Sunday"
+  },
+  "stats": {
+    "studentsTrained": "1000+",
+    "yearsExperience": "10+",
+    "coursesOffered": "15+",
+    "certificatesIssued": "2000+"
+  },
+  "theme": {
+    "primary": "#D61F26",
+    "secondary": "#1F3D8A",
+    "accent": "#F59E0B"
+  }
+}
