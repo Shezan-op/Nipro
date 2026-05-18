@@ -6,12 +6,12 @@ import type { NextRequest } from 'next/server'
 const rateLimitMap = new Map<string, { count: number, resetTime: number }>()
 
 export function middleware(request: NextRequest) {
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+  const ip = request.headers.get('x-forwarded-for') || 'unknown'
   const url = request.nextUrl.pathname
 
   // Define limits
   let limit = 100 // Default limit
-  let windowMs = 60 * 1000 // 1 minute
+  const windowMs = 60 * 1000 // 1 minute
 
   if (url === '/admin/login') {
     limit = 5
