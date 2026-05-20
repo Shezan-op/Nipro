@@ -6,8 +6,10 @@ import { MessageCircle, ShieldCheck, Award, Users, Sparkles } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
+import { SiteSettings } from '@/lib/data-service';
 
-export function Hero() {
+export function Hero({ settings }: { settings?: SiteSettings }) {
+  const whatsappUrl = `https://wa.me/${settings?.contact?.whatsapp?.replace(/\D/g, '') || '919000000000'}`;
   return (
     <section className="relative w-full h-[95vh] min-h-[800px] flex items-center justify-center overflow-hidden bg-slate-950 bg-gradient-to-b from-slate-900 to-slate-950 bg-grid-white-5">
       {/* Soft Radial Glow */}
@@ -79,7 +81,7 @@ export function Hero() {
             className="flex flex-col sm:flex-row gap-6 justify-center items-center"
           >
             <Button asChild size="lg" className="bg-nipro-red hover:bg-red-700 text-white h-16 px-12 text-xl font-black rounded-2xl shadow-[0_20px_50px_rgba(214,31,38,0.4)] transition-all hover:scale-105 active:scale-95">
-              <Link href="https://wa.me/919000000000">
+              <Link href={whatsappUrl}>
                 <MessageCircle className="mr-3 h-6 w-6 text-white" />
                 Enquire on WhatsApp
               </Link>

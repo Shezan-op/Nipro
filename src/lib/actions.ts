@@ -12,6 +12,7 @@ import {
   deleteCertificate as deleteCertificateFromDb,
   saveCourses as saveCoursesToDb,
   saveBlogs as saveBlogsToDb,
+  deleteBlog as deleteBlogFromDb,
   saveSettings as saveSettingsToDb,
   Certificate, 
   Course, 
@@ -38,6 +39,7 @@ export async function addCertificate(cert: Certificate) {
     await addCertificateToDb(cert);
     revalidatePath('/admin/certificates');
     revalidatePath('/verify');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to add certificate:', error);
@@ -50,6 +52,7 @@ export async function deleteCertificate(id: string) {
     await deleteCertificateFromDb(id);
     revalidatePath('/admin/certificates');
     revalidatePath('/verify');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to delete certificate:', error);
@@ -62,6 +65,7 @@ export async function updateCertificateAction(id: string, cert: Partial<Certific
     await updateCertificateInDb(id, cert);
     revalidatePath('/admin/certificates');
     revalidatePath('/verify');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to update certificate:', error);
@@ -94,6 +98,7 @@ export async function saveCourses(courses: Course[]) {
     revalidatePath('/courses');
     revalidatePath('/admin/courses');
     revalidatePath('/');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to save courses:', error);
@@ -117,6 +122,7 @@ export async function saveBlogs(blogs: BlogPost[]) {
     revalidatePath('/news');
     revalidatePath('/admin/blogs');
     revalidatePath('/');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to save blogs:', error);
@@ -130,6 +136,20 @@ export async function getBlog(id: string): Promise<BlogPost | null> {
   } catch (error) {
     console.error('Failed to get blog:', error);
     return null;
+  }
+}
+
+export async function deleteBlogAction(id: string) {
+  try {
+    await deleteBlogFromDb(id);
+    revalidatePath('/news');
+    revalidatePath('/admin/blogs');
+    revalidatePath('/');
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete blog:', error);
+    return { success: false, error: 'Failed to delete blog' };
   }
 }
 
@@ -149,6 +169,7 @@ export async function saveSettings(settings: SiteSettings) {
     revalidatePath('/');
     revalidatePath('/contact');
     revalidatePath('/admin/settings');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to save settings:', error);
@@ -173,6 +194,7 @@ export async function addDiscountAction(discount: Omit<Discount, 'id'>) {
     await addDiscount(discount);
     revalidatePath('/admin/discounts');
     revalidatePath('/');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to add discount:', error);
@@ -186,6 +208,7 @@ export async function deleteDiscountAction(id: string) {
     await deleteDiscount(id);
     revalidatePath('/admin/discounts');
     revalidatePath('/');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to delete discount:', error);
@@ -199,6 +222,7 @@ export async function updateDiscountAction(id: string, discount: Partial<Discoun
     await updateDiscount(id, discount);
     revalidatePath('/admin/discounts');
     revalidatePath('/');
+    revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
     console.error('Failed to update discount:', error);

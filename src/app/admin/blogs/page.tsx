@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { getBlogs, saveBlogs } from '@/lib/actions';
+import { getBlogs, saveBlogs, deleteBlogAction } from '@/lib/actions';
 import { BlogPost } from '@/lib/data-service';
 import { cn } from '@/lib/utils';
 
@@ -123,10 +123,9 @@ export default function AdminBlogs() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this post?')) return;
-    const updatedBlogs = blogs.filter(b => b.id !== id);
-    const result = await saveBlogs(updatedBlogs);
+    const result = await deleteBlogAction(id);
     if (result.success) {
-      setBlogs(updatedBlogs);
+      setBlogs(blogs.filter(b => b.id !== id));
       toast.success('Blog post deleted');
     } else {
       toast.error('Failed to delete');

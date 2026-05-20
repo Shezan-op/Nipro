@@ -3,7 +3,7 @@ import { FeaturedCourses } from "@/components/home/FeaturedCourses";
 import { PromotionalBanner } from "@/components/home/PromotionalBanner";
 import { TrustGallery } from "@/components/home/TrustGallery";
 import { BlogCard } from "@/components/home/BlogCard";
-import { getCourses, getBlogPosts, getSiteSettings, BlogPost } from "@/lib/data-service";
+import { getCourses, getBlogPosts, getSiteSettings, BlogPost, SiteSettings } from "@/lib/data-service";
 import { Laptop, ShieldCheck, Globe, ArrowRight, Sparkles, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -24,7 +24,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col">
       {isOfferActive && <PromotionalBanner />}
-      <Hero />
+      <Hero settings={settings as SiteSettings} />
       
       {/* Alumni / Placement Strip */}
       <section className="bg-slate-50 border-b border-gray-200 py-8">

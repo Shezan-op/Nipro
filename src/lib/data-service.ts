@@ -261,6 +261,16 @@ export async function saveBlogs(blogs: BlogPost[]): Promise<void> {
   if (error) throw error;
 }
 
+export async function deleteBlog(id: string): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase
+    .from('blogs')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
 // Discount Functions
 export async function getDiscounts(): Promise<Discount[]> {
   const supabase = await getSupabaseClient();
