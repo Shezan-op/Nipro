@@ -1,5 +1,12 @@
 # Changelog
 
+## Phase 9: Premium Ed-Tech Homepage Transformation
+- **Alumni/Placement Strip**: Added a minimalist strip (`bg-slate-50`) with grayscale company logos (TCS, Wipro, Infosys, HDFC Bank).
+- **Learning Pathway**: Implemented a 3-step card-based flow (Fundamentals → Projects → Govt. Certification).
+- **Facility Grid**: Added a modern masonry/grid layout for lab imagery to highlight world-class infrastructure.
+- **Outcome-Driven Testimonials**: Redesigned testimonials into large "Outcome Cards" with a dark (`bg-slate-900`) background and high contrast for trust-building.
+- **Cleanup**: Removed the unused `<CertificateSearch />` component and `<TestimonialMarquee />` from `src/app/page.tsx` for cleaner layout hierarchy.
+
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2026-05-18
