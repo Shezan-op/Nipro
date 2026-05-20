@@ -26,13 +26,16 @@ export function Navbar() {
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-3">
-              <Image 
-                src="/Logo.png" 
-                alt="Nipro Computer Education" 
-                width={48} 
-                height={30} 
-                className="h-10 w-auto"
-              />
+              <div className="h-10 w-auto flex items-center justify-center overflow-hidden shrink-0">
+                <Image 
+                  src="/Logo.png" 
+                  alt="Nipro Computer Education" 
+                  width={88} 
+                  height={40} 
+                  className="h-10 w-auto object-contain"
+                  priority
+                />
+              </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold tracking-tight text-nipro-blue">NIPRO</span>
                 <span className="text-[10px] font-medium uppercase tracking-widest text-nipro-red">Computer Education</span>

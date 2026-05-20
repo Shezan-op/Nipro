@@ -193,6 +193,19 @@ export async function deleteDiscountAction(id: string) {
   }
 }
 
+export async function updateDiscountAction(id: string, discount: Partial<Discount>) {
+  const { updateDiscount } = await import('./data-service');
+  try {
+    await updateDiscount(id, discount);
+    revalidatePath('/admin/discounts');
+    revalidatePath('/');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update discount:', error);
+    return { success: false, error: 'Failed to update discount' };
+  }
+}
+
 // Contact Form Action
 export async function submitContactForm(formData: FormData) {
   // Simulate delay
@@ -224,14 +237,28 @@ export async function submitContactForm(formData: FormData) {
 export async function uploadFileAction(bucket: string, fileName: string, formData: FormData) {
   try {
     const file = formData.get('file') as File;
-    if (!file) throw new Error('No file provided');
+    if (!file) {
+      console.error(`[uploadFileAction] File missing in formData for bucket: ${bucket}, filename: ${fileName}`);
+      throw new Error('No file provided');
+    }
 
     const path = `${Date.now()}-${fileName}`;
+    console.log(`[uploadFileAction] Starting upload for bucket: ${bucket}, path: ${path}, size: ${file.size} bytes`);
+    
     const url = await uploadFileToDb(bucket, path, file);
+    console.log(`[uploadFileAction] Upload successful. Public URL: ${url}`);
     
     return { success: true, url };
-  } catch (error) {
-    console.error('Upload failed:', error);
-    return { success: false, error: 'Upload failed' };
+  } catch (error: any) {
+    console.error(`[uploadFileAction] Upload failed for bucket "${bucket}" with file "${fileName}":`, {
+      message: error?.message || error,
+      details: error?.details || 'No additional details',
+      hint: error?.hint || 'No hint',
+      stack: error?.stack
+    });
+    return { 
+      success: false, 
+      error: `Upload failed: ${error?.message || 'Unknown error'}` 
+    };
   }
 }

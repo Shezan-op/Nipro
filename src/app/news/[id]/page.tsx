@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { formatDate } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 export default async function BlogDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const blog = await getBlog(id);
@@ -71,6 +73,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
               alt={blog.title}
               fill
               priority
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>

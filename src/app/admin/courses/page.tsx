@@ -11,7 +11,7 @@ import {
   Loader2,
   BookOpen
 } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -25,8 +25,9 @@ export default function AdminCourses() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Course | null>(null);
+  const [isAddingCourse, setIsAddingCourse] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [formState, setFormState] = useState<Course | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -42,35 +43,39 @@ export default function AdminCourses() {
   }, []);
 
   const handleEdit = (course: Course) => {
-    setEditingId(course.id);
-    setEditForm({ ...course });
+    setEditingCourse(course);
+    setIsAddingCourse(false);
+    setFormState({ ...course });
   };
 
-  const handleCancel = () => {
-    setEditingId(null);
-    setEditForm(null);
+  const handleCancelForm = () => {
+    setIsAddingCourse(false);
+    setEditingCourse(null);
+    setFormState(null);
   };
 
   const startAdding = () => {
-    const newCourse: Course = {
-      id: Date.now().toString(),
+    setIsAddingCourse(true);
+    setEditingCourse(null);
+    setFormState({
+      id: '',
       name: '',
       category: '',
       duration: '',
       shortDescription: '',
+      longDescription: '',
       mode: 'Both',
       certification: true,
-      status: 'Active'
-    };
-    setEditForm(newCourse);
-    setEditingId(newCourse.id);
+      status: 'Active',
+      image: ''
+    });
   };
 
-  const handleSave = async () => {
-    if (!editForm) return;
+  const handleSaveForm = async () => {
+    if (!formState) return;
     
     try {
-      CourseSchema.parse(editForm);
+      CourseSchema.parse(formState);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.issues[0].message);
@@ -80,39 +85,41 @@ export default function AdminCourses() {
 
     setSaving(true);
     
-    const courseToSave = { ...editForm };
-    
     let updatedCourses;
-    const isNew = !courses.find(c => c.id === courseToSave.id);
-    
-    if (isNew) {
-      updatedCourses = [courseToSave, ...courses];
+    if (isAddingCourse) {
+      if (courses.some(c => c.id.toLowerCase() === formState.id.toLowerCase())) {
+        toast.error('A course with this ID already exists');
+        setSaving(false);
+        return;
+      }
+      updatedCourses = [formState, ...courses];
     } else {
-      updatedCourses = courses.map(c => c.id === courseToSave.id ? courseToSave : c);
+      updatedCourses = courses.map(c => c.id === formState.id ? formState : c);
     }
 
     const result = await saveCourses(updatedCourses);
     
     if (result.success) {
       setCourses(updatedCourses);
-      setEditingId(null);
-      setEditForm(null);
-      toast.success(isNew ? 'Course added' : 'Course updated');
+      setIsAddingCourse(false);
+      setEditingCourse(null);
+      setFormState(null);
+      toast.success(isAddingCourse ? 'Course added' : 'Course updated');
     } else {
-      toast.error('Failed to update');
+      toast.error('Failed to save course');
     }
     setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure?')) return;
+    if (!confirm('Are you sure you want to delete this course?')) return;
     const updatedCourses = courses.filter(c => c.id !== id);
     const result = await saveCourses(updatedCourses);
     if (result.success) {
       setCourses(updatedCourses);
       toast.success('Course deleted');
     } else {
-      toast.error('Failed to delete');
+      toast.error('Failed to delete course');
     }
   };
 
@@ -128,22 +135,177 @@ export default function AdminCourses() {
           <h1 className="text-3xl font-bold text-nipro-blue">Course Management</h1>
           <p className="text-muted-foreground mt-1">Add, edit, or remove courses from the catalog.</p>
         </div>
-        <Button 
-          onClick={startAdding}
-          className="h-11 px-6 bg-nipro-red hover:bg-nipro-red/90 text-white shadow-lg shadow-nipro-red/20"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Course
-        </Button>
+        {(!isAddingCourse && !editingCourse) && (
+          <Button 
+            onClick={startAdding}
+            className="h-11 px-6 bg-nipro-red hover:bg-nipro-red/90 text-white shadow-lg shadow-nipro-red/20"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Course
+          </Button>
+        )}
       </div>
 
-      <Card className="border border-slate-200 shadow-sm rounded-xl overflow-hidden bg-white">
+      {(isAddingCourse || editingCourse) && (
+        <Card className="border-none shadow-lg hover:shadow-xl rounded-2xl bg-white transition-all duration-300 ring-1 ring-slate-900/5 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <CardHeader className="border-b border-gray-100 flex flex-row items-center justify-between">
+            <CardTitle className="text-xl font-bold text-nipro-blue tracking-tight">
+              {isAddingCourse ? 'Add New Course' : `Edit Course: ${editingCourse?.name}`}
+            </CardTitle>
+            <Button variant="ghost" size="icon" onClick={handleCancelForm}>
+              <X className="h-5 w-5" />
+            </Button>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Course ID (Slug)</label>
+                <Input 
+                  placeholder="e.g. tally-gst"
+                  value={formState?.id || ''}
+                  onChange={e => setFormState({...formState!, id: e.target.value})}
+                  disabled={!isAddingCourse}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red disabled:bg-slate-50 disabled:cursor-not-allowed"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Course Name</label>
+                <Input 
+                  placeholder="e.g. TallyPrime with GST"
+                  value={formState?.name || ''}
+                  onChange={e => setFormState({...formState!, name: e.target.value})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Category</label>
+                <Input 
+                  placeholder="e.g. Accounting"
+                  value={formState?.category || ''}
+                  onChange={e => setFormState({...formState!, category: e.target.value})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Duration</label>
+                <Input 
+                  placeholder="e.g. 2 Months (60 Hours)"
+                  value={formState?.duration || ''}
+                  onChange={e => setFormState({...formState!, duration: e.target.value})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Discounted Price (₹)</label>
+                <Input 
+                  placeholder="e.g. 4500"
+                  type="number"
+                  value={formState?.price !== undefined ? formState.price : ''}
+                  onChange={e => setFormState({...formState!, price: e.target.value ? parseFloat(e.target.value) : undefined})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Original Price (₹)</label>
+                <Input 
+                  placeholder="e.g. 6000"
+                  type="number"
+                  value={formState?.originalPrice !== undefined ? formState.originalPrice : ''}
+                  onChange={e => setFormState({...formState!, originalPrice: e.target.value ? parseFloat(e.target.value) : undefined})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Mode</label>
+                <select
+                  value={formState?.mode || 'Both'}
+                  onChange={e => setFormState({...formState!, mode: e.target.value as 'Online' | 'Offline' | 'Both'})}
+                  className="w-full h-12 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                >
+                  <option value="Both">Both (Online & Offline)</option>
+                  <option value="Online">Online Only</option>
+                  <option value="Offline">Offline Only</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Status</label>
+                <select
+                  value={formState?.status || 'Active'}
+                  onChange={e => setFormState({...formState!, status: e.target.value as 'Active' | 'Inactive'})}
+                  className="w-full h-12 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Has Certification</label>
+                <select
+                  value={formState?.certification ? 'Yes' : 'No'}
+                  onChange={e => setFormState({...formState!, certification: e.target.value === 'Yes'})}
+                  className="w-full h-12 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                >
+                  <option value="Yes">Yes (ISO Certified)</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Course Image URL</label>
+                <Input 
+                  placeholder="e.g. /images/courses/tally.jpg"
+                  value={formState?.image || ''}
+                  onChange={e => setFormState({...formState!, image: e.target.value})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Short Description (Displays in list)</label>
+                <textarea
+                  placeholder="Enter a brief summary of the course (min 10 characters)..."
+                  value={formState?.shortDescription || ''}
+                  onChange={e => setFormState({...formState!, shortDescription: e.target.value})}
+                  className="w-full min-h-[80px] p-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Detailed Description (Optional)</label>
+                <textarea
+                  placeholder="Enter the full syllabus, detailed description, and learning outcomes..."
+                  value={formState?.longDescription || ''}
+                  onChange={e => setFormState({...formState!, longDescription: e.target.value})}
+                  className="w-full min-h-[140px] p-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+              <Button variant="outline" className="h-11 px-6" onClick={handleCancelForm} disabled={saving}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveForm}
+                disabled={saving}
+                className="h-11 px-8 bg-nipro-blue hover:bg-nipro-blue/90 text-white shadow-lg shadow-nipro-blue/20"
+              >
+                {saving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {saving ? 'Saving...' : 'Save Course'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="border-none shadow-lg hover:shadow-xl rounded-2xl overflow-hidden bg-white transition-all duration-300 ring-1 ring-slate-900/5">
         <CardHeader className="bg-white border-b border-gray-100 py-4">
           <div className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search courses..." 
-              className="pl-10 h-10 border border-gray-200 bg-white"
+              className="pl-10 h-10 border border-gray-200 bg-white focus-visible:ring-nipro-red"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -153,7 +315,7 @@ export default function AdminCourses() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50/50 text-slate-600 text-xs uppercase tracking-widest font-bold">
+                <tr className="bg-gray-50/50 text-slate-600 text-xs uppercase tracking-widest font-bold border-b border-gray-100">
                   <th className="px-6 py-4">Course Details</th>
                   <th className="px-6 py-4">Category</th>
                   <th className="px-6 py-4">Duration</th>
@@ -164,110 +326,54 @@ export default function AdminCourses() {
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-20 text-center text-muted-foreground">
+                    <td colSpan={5} className="px-6 py-20 text-center text-muted-foreground">
                       <Loader2 className="h-8 w-8 animate-spin text-nipro-red mx-auto mb-4" />
                       Loading...
                     </td>
                   </tr>
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-20 text-center text-muted-foreground">
+                      No courses found.
+                    </td>
+                  </tr>
                 ) : filtered.map((course) => (
-                  <tr key={course.id} className="hover:bg-gray-50/50 transition-colors">
-                    {editingId === course.id ? (
-                      <>
-                        <td className="px-6 py-4">
-                          <Input 
-                            value={editForm?.name} 
-                            onChange={e => setEditForm({...editForm!, name: e.target.value})}
-                            className="h-9 mb-2"
-                            placeholder="Course Name"
-                          />
-                          <Input 
-                            value={editForm?.shortDescription} 
-                            onChange={e => setEditForm({...editForm!, shortDescription: e.target.value})}
-                            className="h-9 text-xs"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <Input 
-                            value={editForm?.category} 
-                            onChange={e => setEditForm({...editForm!, category: e.target.value})}
-                            className="h-9"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <Input 
-                            value={editForm?.duration} 
-                            onChange={e => setEditForm({...editForm!, duration: e.target.value})}
-                            className="h-9"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            <Input 
-                              value={editForm?.price !== undefined ? editForm.price.toString() : ''} 
-                              onChange={e => setEditForm({...editForm!, price: e.target.value ? parseFloat(e.target.value) : undefined})}
-                              className="h-9 w-24"
-                              placeholder="Disc"
-                              type="number"
-                            />
-                            <Input 
-                              value={editForm?.originalPrice !== undefined ? editForm.originalPrice.toString() : ''} 
-                              onChange={e => setEditForm({...editForm!, originalPrice: e.target.value ? parseFloat(e.target.value) : undefined})}
-                              className="h-9 w-24"
-                              placeholder="Orig"
-                              type="number"
-                            />
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8" onClick={handleSave} disabled={saving}>
-                              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-8" onClick={handleCancel}>
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-xl bg-nipro-blue/5 flex items-center justify-center text-nipro-blue">
-                              <BookOpen className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <p className="font-bold text-nipro-blue">{course.name}</p>
-                              <p className="text-xs text-muted-foreground line-clamp-1">{course.shortDescription}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-md uppercase tracking-wider">
-                            {course.category}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground font-medium">
-                          {course.duration}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-medium">
-                          <span className="text-nipro-blue">₹{course.price || 0}</span>
-                          {course.originalPrice && (
-                            <span className="text-muted-foreground line-through ml-2 text-xs">₹{course.originalPrice}</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(course)}>
-                              <Edit2 className="h-4 w-4 text-muted-foreground" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(course.id)}>
-                              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-nipro-red" />
-                            </Button>
-                          </div>
-                        </td>
-                      </>
-                    )}
+                  <tr key={course.id} className="hover:bg-slate-50/80 transition-all duration-200">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-nipro-blue/5 flex items-center justify-center text-nipro-blue">
+                          <BookOpen className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-nipro-blue">{course.name}</p>
+                          <p className="text-xs text-slate-500 line-clamp-1">{course.shortDescription}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-md uppercase tracking-wider">
+                        {course.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-500 font-medium">
+                      {course.duration}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold">
+                      <span className="text-nipro-blue font-bold">₹{course.price || 0}</span>
+                      {course.originalPrice && (
+                        <span className="text-slate-400 line-through ml-2 text-xs font-normal">₹{course.originalPrice}</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-nipro-blue" onClick={() => handleEdit(course)}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-nipro-red" onClick={() => handleDelete(course.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

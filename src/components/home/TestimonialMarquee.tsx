@@ -47,17 +47,17 @@ const doubledTestimonials = [...testimonials, ...testimonials];
 
 export function TestimonialMarquee() {
   return (
-    <section className="py-24 bg-white overflow-hidden relative">
+    <section className="py-28 bg-white overflow-hidden relative bg-grid-slate-100">
       {/* Decorative background element */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--nipro-red)_0%,_transparent_100%)] opacity-[0.03] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(214,31,38,0.04),transparent_70%)] pointer-events-none" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16 relative z-10">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         <div className="text-center">
-          <h2 className="text-sm font-black text-nipro-red uppercase tracking-[0.3em] mb-4">Success Stories</h2>
-          <h3 className="text-4xl md:text-6xl font-black text-nipro-blue tracking-tighter">
+          <h2 className="text-sm font-bold text-nipro-red uppercase tracking-widest mb-4">Success Stories</h2>
+          <h3 className="text-4xl md:text-6xl font-extrabold text-nipro-blue tracking-tight leading-tight">
             THE <span className="text-nipro-red">NIPRO</span> IMPACT
           </h3>
-          <p className="text-muted-foreground mt-6 max-w-2xl mx-auto text-lg font-medium">
+          <p className="text-slate-600 mt-6 max-w-2xl mx-auto text-base sm:text-lg font-medium leading-relaxed">
             Join the ranks of our successful alumni who transformed their passion into professional careers in Korutla.
           </p>
         </div>
@@ -82,7 +82,7 @@ export function TestimonialMarquee() {
 
 function TestimonialCard({ testimonial }: { testimonial: typeof testimonials[0] }) {
   return (
-    <div className="flex-shrink-0 w-[340px] bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300 group">
+    <div className="flex-shrink-0 w-[340px] bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ring-1 ring-slate-900/5 hover:-translate-y-1">
       {/* Stars */}
       <div className="flex items-center gap-0.5 mb-4">
         {Array.from({ length: 5 }).map((_, i) => (
@@ -109,6 +109,7 @@ function TestimonialCard({ testimonial }: { testimonial: typeof testimonials[0] 
             src={testimonial.image}
             alt={testimonial.name}
             fill
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
           />
         </div>

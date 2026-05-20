@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CourseList } from '@/components/courses/CourseList';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CoursesPage() {
   const courses = await getCourses();
   const categories = Array.from(new Set(courses.map(c => c.category)));

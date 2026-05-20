@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { getCoursesAction, getCertificates, getBlogs } from '@/lib/actions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
   const courses = await getCoursesAction();
   const certificates = await getCertificates();

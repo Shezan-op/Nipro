@@ -28,7 +28,7 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
       viewport={{ once: true }}
       className="h-full"
     >
-      <Card className="h-full border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(214,31,38,0.1)] transition-all duration-500 flex flex-col group overflow-hidden bg-white/80 backdrop-blur-sm hover:-translate-y-2">
+      <Card className="h-full border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-500 flex flex-col group overflow-hidden bg-white/80 backdrop-blur-sm hover:-translate-y-2 ring-1 ring-slate-900/5">
         <CardHeader className="p-0 overflow-hidden h-56 relative">
           <div className="relative w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center overflow-hidden">
             {course.image ? (
@@ -36,6 +36,7 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
                 src={course.image} 
                 alt={course.name} 
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out" 
               />
             ) : (

@@ -147,6 +147,7 @@ function VerifyContent() {
                       src={cert.imageUrl || 'https://images.unsplash.com/photo-1589330694653-ded6df03f754?q=80&w=2000&auto=format&fit=crop'} 
                       alt="Certificate" 
                       fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-contain p-4"
                     />
                   </div>

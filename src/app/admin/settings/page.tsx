@@ -87,13 +87,13 @@ export default function AdminSettings() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="border border-slate-200 shadow-sm rounded-xl">
+          <Card className="border-none shadow-lg hover:shadow-xl rounded-2xl bg-white transition-all duration-300 ring-1 ring-slate-900/5">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-bold text-nipro-blue tracking-tight">
                 <Globe className="h-5 w-5 text-nipro-red" />
                 Institute Branding
               </CardTitle>
-              <CardDescription>Main identity of the institute across the site.</CardDescription>
+              <CardDescription className="text-slate-500">Main identity of the institute across the site.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -102,7 +102,7 @@ export default function AdminSettings() {
                   name="name" 
                   value={settings?.name || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
               </div>
               <div className="space-y-2">
@@ -111,19 +111,43 @@ export default function AdminSettings() {
                   name="tagline" 
                   value={settings?.tagline || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
+              </div>
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100/85 rounded-xl border border-slate-150 transition-colors mt-4">
+                <div className="pr-4">
+                  <label className="text-sm font-bold text-slate-700 block">Promotional Banner</label>
+                  <span className="text-xs text-slate-500 block mt-0.5 leading-snug">Toggle the visibility of the site-wide promotional discount banner.</span>
+                </div>
+                <div className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="is_offer_active"
+                    id="is_offer_active"
+                    checked={settings?.is_offer_active || false}
+                    onChange={(e) => {
+                      if (settings) {
+                        setSettings({
+                          ...settings,
+                          is_offer_active: e.target.checked
+                        });
+                      }
+                    }}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-350 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-nipro-red"></div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border border-slate-200 shadow-sm rounded-xl">
+          <Card className="border-none shadow-lg hover:shadow-xl rounded-2xl bg-white transition-all duration-300 ring-1 ring-slate-900/5">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-bold text-nipro-blue tracking-tight">
                 <Phone className="h-5 w-5 text-nipro-red" />
                 Contact Information
               </CardTitle>
-              <CardDescription>Displayed on the contact page and footer.</CardDescription>
+              <CardDescription className="text-slate-500">Displayed on the contact page and footer.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -132,7 +156,7 @@ export default function AdminSettings() {
                   name="contact.phone" 
                   value={settings?.contact.phone || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
               </div>
               <div className="space-y-2">
@@ -141,7 +165,7 @@ export default function AdminSettings() {
                   name="contact.email" 
                   value={settings?.contact.email || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
               </div>
               <div className="space-y-2">
@@ -150,19 +174,19 @@ export default function AdminSettings() {
                   name="contact.whatsapp" 
                   value={settings?.contact.whatsapp || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border border-slate-200 shadow-sm rounded-xl lg:col-span-2">
+          <Card className="border-none shadow-lg hover:shadow-xl rounded-2xl bg-white transition-all duration-300 ring-1 ring-slate-900/5 lg:col-span-2">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 font-bold text-nipro-blue tracking-tight">
                 <MapPin className="h-5 w-5 text-nipro-red" />
                 Location & Hours
               </CardTitle>
-              <CardDescription>Physical address and operational timings.</CardDescription>
+              <CardDescription className="text-slate-500">Physical address and operational timings.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -171,7 +195,7 @@ export default function AdminSettings() {
                   name="contact.address" 
                   value={settings?.contact.address || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
               </div>
               <div className="space-y-2">
@@ -180,7 +204,7 @@ export default function AdminSettings() {
                   name="contact.googleMapsLink" 
                   value={settings?.contact.googleMapsLink || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
               </div>
               <div className="space-y-2">
@@ -189,7 +213,7 @@ export default function AdminSettings() {
                   name="contact.hours" 
                   value={settings?.contact.hours || ''} 
                   onChange={handleChange} 
-                  className="h-11 border border-gray-200 bg-white"
+                  className="h-11 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 />
               </div>
             </CardContent>

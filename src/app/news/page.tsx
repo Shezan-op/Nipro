@@ -3,6 +3,8 @@ import { BlogCard } from "@/components/home/BlogCard";
 import { GraduationCap, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewsPage() {
   const allBlogs = await getBlogPosts();
   const publishedBlogs = allBlogs.filter(blog => blog.status === 'Published');

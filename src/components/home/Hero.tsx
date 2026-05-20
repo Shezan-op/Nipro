@@ -9,7 +9,10 @@ import Image from 'next/image';
 
 export function Hero() {
   return (
-    <section className="relative w-full h-[95vh] min-h-[800px] flex items-center justify-center overflow-hidden bg-slate-950 bg-gradient-to-b from-slate-900 to-slate-950">
+    <section className="relative w-full h-[95vh] min-h-[800px] flex items-center justify-center overflow-hidden bg-slate-950 bg-gradient-to-b from-slate-900 to-slate-950 bg-grid-white-5">
+      {/* Soft Radial Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(214,31,38,0.08),transparent_70%)] pointer-events-none" />
+
       {/* Content Layer */}
       <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center">
         {/* Centered Logo - Premium Placement */}
@@ -24,6 +27,7 @@ export function Hero() {
               src="/images/Logo.png"
               alt="Nipro Computer Education"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-contain drop-shadow-[0_0_40px_rgba(214,31,38,0.4)]"
               priority
             />
@@ -62,7 +66,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-lg sm:text-2xl text-white/80 max-w-2xl mx-auto mb-12 font-medium leading-relaxed"
+            className="text-lg sm:text-2xl text-slate-300 max-w-2xl mx-auto mb-12 font-medium leading-relaxed tracking-tight"
           >
             Empowering 1000+ students in Korutla with job-ready skills in Design, Accounting, and IT. Get certified by the experts.
           </motion.p>

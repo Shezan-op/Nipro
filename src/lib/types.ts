@@ -47,6 +47,7 @@ export interface Discount {
 export interface SiteSettings {
   name: string;
   tagline?: string;
+  is_offer_active?: boolean;
   contact: {
     email: string;
     phone: string;
@@ -62,3 +63,4 @@ export interface SiteSettings {
     youtube?: string;
   };
 }
+

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Mail, MapPin, Phone, MessageCircle, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -12,9 +13,15 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="col-span-1 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-white text-primary">
-                <GraduationCap className="h-5 w-5" />
+            <Link href="/" className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-auto flex items-center justify-center overflow-hidden shrink-0">
+                <Image 
+                  src="/Logo.png" 
+                  alt="Nipro Logo" 
+                  width={88} 
+                  height={40} 
+                  className="h-10 w-auto object-contain brightness-0 invert" 
+                />
               </div>
               <span className="text-xl font-bold tracking-tight text-white">NIPRO</span>
             </Link>

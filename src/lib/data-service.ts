@@ -309,6 +309,22 @@ export async function deleteDiscount(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function updateDiscount(id: string, discount: Partial<Discount>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const updateData: any = {};
+  if (discount.title !== undefined) updateData.title = discount.title;
+  if (discount.description !== undefined) updateData.description = discount.description;
+  if (discount.percentage !== undefined) updateData.percentage = discount.percentage;
+  if (discount.validUntil !== undefined) updateData.valid_until = discount.validUntil;
+
+  const { error } = await supabase
+    .from('discounts')
+    .update(updateData)
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
 // Settings Functions
 export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = await getSupabaseClient();

@@ -171,9 +171,9 @@ export default function AdminBlogs() {
       </div>
 
       {(isAdding || editingId) && editForm ? (
-        <Card className="border border-slate-200 shadow-sm rounded-xl bg-white animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <Card className="border-none shadow-lg hover:shadow-xl rounded-2xl bg-white transition-all duration-300 ring-1 ring-slate-900/5 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <CardHeader className="border-b border-gray-100 flex flex-row items-center justify-between">
-            <CardTitle className="text-xl text-nipro-blue">
+            <CardTitle className="text-xl font-bold text-nipro-blue tracking-tight">
               {isAdding ? 'Create New Blog Post' : 'Edit Blog Post'}
             </CardTitle>
             <Button variant="ghost" size="icon" onClick={handleCancel}>
@@ -188,7 +188,7 @@ export default function AdminBlogs() {
                   value={editForm.title}
                   onChange={e => setEditForm({...editForm, title: e.target.value})}
                   placeholder="Enter a catchy title..."
-                  className="h-12 border-gray-200 focus:border-nipro-blue focus:ring-nipro-blue/20"
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
                 />
               </div>
               <div className="space-y-2">
@@ -218,7 +218,7 @@ export default function AdminBlogs() {
                 value={editForm.content}
                 onChange={e => setEditForm({...editForm, content: e.target.value})}
                 placeholder="Write your blog content here..."
-                className="min-h-[200px] border-gray-200 resize-none"
+                className="min-h-[200px] border-gray-200 resize-none focus-visible:ring-nipro-red"
               />
             </div>
 
@@ -226,7 +226,7 @@ export default function AdminBlogs() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Status</label>
                 <select 
-                  className="w-full h-12 rounded-md border border-gray-200 px-3 bg-white"
+                  className="w-full h-12 rounded-md border border-gray-200 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-nipro-red/20 focus:border-nipro-red"
                   value={editForm.status}
                   onChange={e => setEditForm({...editForm, status: e.target.value as 'Published' | 'Draft'})}
                 >
@@ -240,7 +240,7 @@ export default function AdminBlogs() {
                   type="date"
                   value={editForm.createdAt}
                   onChange={e => setEditForm({...editForm, createdAt: e.target.value})}
-                  className="h-12 border-gray-200"
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
                 />
               </div>
             </div>
@@ -261,13 +261,13 @@ export default function AdminBlogs() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="border border-slate-200 shadow-sm rounded-xl overflow-hidden bg-white">
+        <Card className="border-none shadow-lg hover:shadow-xl rounded-2xl overflow-hidden bg-white transition-all duration-300 ring-1 ring-slate-900/5">
           <CardHeader className="bg-white border-b border-gray-100 py-4">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search blogs..." 
-                className="pl-10 h-10 bg-gray-50 border-none"
+                className="pl-10 h-10 border border-gray-200 bg-white focus-visible:ring-nipro-red"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -277,7 +277,7 @@ export default function AdminBlogs() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-gray-50/50 text-slate-600 text-xs uppercase tracking-widest font-bold">
+                  <tr className="bg-gray-50/50 text-slate-600 text-xs uppercase tracking-widest font-bold border-b border-gray-100">
                     <th className="px-6 py-4">Title & Content</th>
                     <th className="px-6 py-4">Date</th>
                     <th className="px-6 py-4">Status</th>
@@ -294,20 +294,21 @@ export default function AdminBlogs() {
                     </tr>
                   ) : filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-20 text-center text-muted-foreground">
+                      <td colSpan={4} className="px-6 py-20 text-center text-slate-500 font-medium">
                         No blog posts found.
                       </td>
                     </tr>
                   ) : filtered.map((blog) => (
-                    <tr key={blog.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={blog.id} className="hover:bg-slate-50/80 transition-all duration-200">
                       <td className="px-6 py-6 max-w-md">
                         <div className="flex gap-4">
-                          <div className="h-16 w-24 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
+                          <div className="h-16 w-24 relative rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
                             {blog.coverImage ? (
                               <Image 
                                 src={blog.coverImage} 
                                 alt={blog.title} 
                                 fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
                                 className="object-cover" 
                               />
                             ) : (
@@ -318,33 +319,33 @@ export default function AdminBlogs() {
                           </div>
                           <div>
                             <p className="font-bold text-nipro-blue line-clamp-1">{blog.title}</p>
-                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{blog.content}</p>
+                            <p className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">{blog.content}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-6">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
+                        <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                          <Calendar className="h-3.5 w-3.5 text-slate-400" />
                           {blog.createdAt}
                         </div>
                       </td>
                       <td className="px-6 py-6">
                         <span className={cn(
-                          "px-2 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider",
+                          "px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider",
                           blog.status === 'Published' 
-                            ? "bg-green-50 text-green-700" 
-                            : "bg-amber-50 text-amber-700"
+                            ? "bg-green-50 text-green-700 ring-1 ring-green-600/10" 
+                            : "bg-amber-50 text-amber-700 ring-1 ring-amber-600/10"
                         )}>
                           {blog.status}
                         </span>
                       </td>
                       <td className="px-6 py-6 text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-nipro-blue/5" onClick={() => handleEdit(blog)}>
-                            <Edit2 className="h-4 w-4 text-muted-foreground" />
+                          <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-nipro-blue/5 text-slate-400 hover:text-nipro-blue" onClick={() => handleEdit(blog)}>
+                            <Edit2 className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-nipro-red/5" onClick={() => handleDelete(blog.id)}>
-                            <Trash2 className="h-4 w-4 text-muted-foreground hover:text-nipro-red" />
+                          <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-nipro-red/5 text-slate-400 hover:text-nipro-red" onClick={() => handleDelete(blog.id)}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </td>

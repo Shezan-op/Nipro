@@ -51,7 +51,15 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         {!isCollapsed && (
           <div className="flex items-center gap-3">
-            <Image src="/Logo.png" alt="Nipro Logo" width={32} height={32} className="object-contain" />
+            <div className="h-10 w-auto flex items-center justify-center overflow-hidden shrink-0">
+              <Image 
+                src="/Logo.png" 
+                alt="Nipro Logo" 
+                width={88} 
+                height={40} 
+                className="h-8 w-auto object-contain" 
+              />
+            </div>
             <div>
               <h1 className="font-bold text-lg tracking-tight">NIPRO</h1>
               <p className="text-[10px] uppercase tracking-[0.2em] opacity-60">Admin</p>

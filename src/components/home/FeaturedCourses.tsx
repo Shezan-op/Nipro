@@ -13,14 +13,17 @@ interface FeaturedCoursesProps {
 
 export function FeaturedCourses({ courses }: FeaturedCoursesProps) {
   return (
-    <section className="bg-gray-50 py-20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+    <section className="bg-gray-50 py-28 relative bg-grid-slate-100">
+      {/* Soft Radial Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(214,31,38,0.02),transparent_70%)] pointer-events-none" />
+
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-6">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-nipro-blue sm:text-4xl mb-4">
+            <h2 className="text-3xl font-extrabold tracking-tight text-nipro-blue sm:text-4xl lg:text-5xl leading-tight mb-4">
               Explore Our <span className="text-nipro-red">Top Courses</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
               Pick the skill you want, learn at your pace, and walk out with a recognised certificate. It&apos;s that simple.
             </p>
           </div>

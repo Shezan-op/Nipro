@@ -5,6 +5,8 @@ import { Clock, Globe, ShieldCheck, CheckCircle2, ChevronLeft, Phone, Tag, Calen
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: { id: string };
 }
