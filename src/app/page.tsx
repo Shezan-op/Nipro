@@ -71,7 +71,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0" />
             
-            <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 ring-1 ring-slate-900/5 relative z-10 text-center flex flex-col items-center hover:-translate-y-1">
+            <div className="apple-material apple-card-3xl p-8 shadow-sm hover:shadow-md transition-all duration-300 relative z-10 text-center flex flex-col items-center hover:-translate-y-1">
               <div className="w-16 h-16 rounded-full bg-nipro-red/10 flex items-center justify-center text-nipro-red font-bold text-xl mb-6 shadow-md border-4 border-white">1</div>
               <h4 className="text-xl font-bold text-slate-800 mb-3">Fundamentals</h4>
               <p className="text-slate-500 text-sm leading-relaxed">
@@ -79,7 +79,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 ring-1 ring-slate-900/5 relative z-10 text-center flex flex-col items-center hover:-translate-y-1">
+            <div className="apple-material apple-card-3xl p-8 shadow-sm hover:shadow-md transition-all duration-300 relative z-10 text-center flex flex-col items-center hover:-translate-y-1">
               <div className="w-16 h-16 rounded-full bg-nipro-blue/10 flex items-center justify-center text-nipro-blue font-bold text-xl mb-6 shadow-md border-4 border-white">2</div>
               <h4 className="text-xl font-bold text-slate-800 mb-3">Hands-on Projects</h4>
               <p className="text-slate-500 text-sm leading-relaxed">
@@ -87,7 +87,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 ring-1 ring-slate-900/5 relative z-10 text-center flex flex-col items-center hover:-translate-y-1">
+            <div className="apple-material apple-card-3xl p-8 shadow-sm hover:shadow-md transition-all duration-300 relative z-10 text-center flex flex-col items-center hover:-translate-y-1">
               <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 font-bold text-xl mb-6 shadow-md border-4 border-white">3</div>
               <h4 className="text-xl font-bold text-slate-800 mb-3">Govt. Certification</h4>
               <p className="text-slate-500 text-sm leading-relaxed">
@@ -111,7 +111,7 @@ export default async function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2 aspect-video md:aspect-auto md:h-80 bg-slate-200 rounded-2xl overflow-hidden relative group">
+            <div className="md:col-span-2 aspect-video md:aspect-auto md:h-80 bg-slate-200 apple-card-3xl overflow-hidden relative group">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
               <div className="absolute bottom-6 left-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0">
                 <p className="text-white font-bold text-xl">Main Computer Lab</p>
@@ -119,21 +119,21 @@ export default async function Home() {
               </div>
               <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200" alt="Computer Lab" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
-            <div className="aspect-square md:aspect-auto md:h-80 bg-slate-200 rounded-2xl overflow-hidden relative group">
+            <div className="aspect-square md:aspect-auto md:h-80 bg-slate-200 apple-card-3xl overflow-hidden relative group">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
               <div className="absolute bottom-6 left-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0">
                 <p className="text-white font-bold text-lg">One-to-One Focus</p>
               </div>
               <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800" alt="Student coding" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
-            <div className="aspect-square md:aspect-auto md:h-80 bg-slate-200 rounded-2xl overflow-hidden relative group">
+            <div className="aspect-square md:aspect-auto md:h-80 bg-slate-200 apple-card-3xl overflow-hidden relative group">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
               <div className="absolute bottom-6 left-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0">
                 <p className="text-white font-bold text-lg">Discussion Zones</p>
               </div>
               <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=800" alt="Discussion" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
-            <div className="md:col-span-2 aspect-video md:aspect-auto md:h-80 bg-slate-200 rounded-2xl overflow-hidden relative group">
+            <div className="md:col-span-2 aspect-video md:aspect-auto md:h-80 bg-slate-200 apple-card-3xl overflow-hidden relative group">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
               <div className="absolute bottom-6 left-6 z-20 opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0">
                 <p className="text-white font-bold text-xl">Interactive Sessions</p>
@@ -154,7 +154,7 @@ export default async function Home() {
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <StatItem value="1000+" label="Students Trained" />
+            <StatItem value="20,000+" label="Students Trained" />
             <StatItem value="10+" label="Years of Excellence" />
             <StatItem value="15+" label="Job-Ready Courses" />
             <StatItem value="2000+" label="Certificates Issued" />
@@ -170,7 +170,7 @@ export default async function Home() {
           <div className="text-center mb-20">
             <h2 className="text-sm font-bold text-nipro-red uppercase tracking-widest mb-3">Our Promise</h2>
             <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-nipro-blue tracking-tight leading-tight mb-4">
-              Why <span className="text-nipro-red">1000+ Students</span> Trust Nipro
+              Why <span className="text-nipro-red">20,000+ Students</span> Trust Nipro
             </h3>
             <p className="text-slate-600 max-w-2xl mx-auto text-base sm:text-lg">
               We don&apos;t just teach — we prepare you for the real world. Here&apos;s what makes Nipro different.
@@ -204,7 +204,7 @@ export default async function Home() {
         {/* Decorative BG / Glows */}
         <div className="absolute inset-0 opacity-15">
            <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-nipro-red rounded-full blur-[150px]" />
-           <div className="absolute bottom-0 left-10 w-[300px] h-[300px] bg-blue-600 rounded-full blur-[120px]" />
+           <div className="absolute bottom-0 left-10 w-[300px] h-[300px] bg-blue-650 rounded-full blur-[120px]" />
         </div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
@@ -218,7 +218,7 @@ export default async function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-slate-900/60 backdrop-blur-md p-8 rounded-2xl flex flex-col justify-between shadow-xl hover:shadow-2xl hover:-translate-y-2 ring-1 ring-white/10 hover:ring-white/20 transition-all duration-300">
+            <div className="apple-material-dark apple-card-3xl p-8 flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
               <div>
                 <div className="flex text-amber-400 mb-6">
                   <Sparkles className="w-5 h-5 fill-current" />
@@ -242,7 +242,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="bg-slate-900/60 backdrop-blur-md p-8 rounded-2xl flex flex-col justify-between shadow-xl hover:shadow-2xl hover:-translate-y-2 ring-1 ring-white/10 hover:ring-white/20 transition-all duration-300">
+            <div className="apple-material-dark apple-card-3xl p-8 flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
               <div>
                 <div className="flex text-amber-400 mb-6">
                   <Sparkles className="w-5 h-5 fill-current" />
@@ -266,7 +266,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="bg-slate-900/60 backdrop-blur-md p-8 rounded-2xl flex flex-col justify-between shadow-xl hover:shadow-2xl hover:-translate-y-2 ring-1 ring-white/10 hover:ring-white/20 transition-all duration-300 md:col-span-2 lg:col-span-1">
+            <div className="apple-material-dark apple-card-3xl p-8 flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 md:col-span-2 lg:col-span-1">
               <div>
                 <div className="flex text-amber-400 mb-6">
                   <Sparkles className="w-5 h-5 fill-current" />
@@ -349,6 +349,39 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Naksha Promo Banner - Apple-Inspired Premium Styling */}
+      <section className="my-16 mx-4 md:mx-auto max-w-7xl">
+        <div className="bg-[#1C1C1E] border border-white/[0.06] rounded-[24px] p-8 md:p-12 relative overflow-hidden shadow-[0_24px_60px_-15px_rgba(0,0,0,0.6)] flex flex-col md:flex-row items-center justify-between gap-8">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-nipro-red/[0.03] rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-blue-500/[0.02] rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex-1 z-10 flex flex-col md:flex-row md:items-center gap-6">
+            <div className="bg-white/[0.02] border border-white/[0.05] p-4 rounded-2xl flex items-center justify-center shrink-0 w-24 h-24 shadow-inner">
+              <img 
+                src="/naksha-logo.png" 
+                alt="Naksha Logo" 
+                className="max-h-12 w-auto object-contain brightness-0 invert opacity-80" 
+              />
+            </div>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-semibold text-white mb-2 tracking-tight">
+                Looking for Architectural & Design Services?
+              </h2>
+              <p className="text-zinc-400 text-sm md:text-base max-w-2xl leading-relaxed">
+                Discover Naksha, our premium partner specializing in custom architectural design, interior planning, and 3D elevations.
+              </p>
+            </div>
+          </div>
+          
+          <div className="z-10 shrink-0 w-full md:w-auto">
+            <Button asChild className="rounded-full bg-white hover:bg-zinc-100 text-black font-semibold text-sm px-8 py-3.5 h-12 shadow-sm transition-all active:scale-95 duration-200 w-full md:w-auto text-center flex items-center justify-center border-none">
+              <Link href="/naksha">Visit Naksha</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
@@ -364,8 +397,8 @@ function StatItem({ value, label }: { value: string; label: string }) {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
-    <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group ring-1 ring-slate-900/5">
-      <div className="bg-nipro-red/5 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:bg-nipro-red/10 transition-colors">
+    <div className="apple-material apple-card-3xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1.5 transition-all duration-300 group">
+      <div className="bg-nipro-red/5 w-16 h-16 rounded-[16px] flex items-center justify-center mb-6 group-hover:bg-nipro-red/10 transition-colors">
         {icon}
       </div>
       <h3 className="text-xl font-bold text-nipro-blue tracking-tight mb-3">{title}</h3>

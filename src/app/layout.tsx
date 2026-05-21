@@ -20,7 +20,7 @@ export default async function RootLayout({
   const settings = await getSiteSettings();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <LayoutWrapper navbar={<Navbar settings={settings} />} footer={<Footer settings={settings} />}>
           {children}

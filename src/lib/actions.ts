@@ -2,18 +2,26 @@
 
 import { 
   getCourses, 
+  getCourseById,
+  createCourse as createCourseInDb,
+  updateCourse as updateCourseInDb,
+  deleteCourse as deleteCourseFromDb,
   getBlogPosts, 
   getBlogPostById, 
+  createBlog as createBlogInDb,
+  updateBlog as updateBlogInDb,
+  deleteBlog as deleteBlogFromDb,
   getCertificateById, 
   getCertificates as getCertificatesFromDb,
-  getSiteSettings,
   addCertificate as addCertificateToDb,
   updateCertificate as updateCertificateInDb,
   deleteCertificate as deleteCertificateFromDb,
-  saveCourses as saveCoursesToDb,
-  saveBlogs as saveBlogsToDb,
-  deleteBlog as deleteBlogFromDb,
+  getSiteSettings,
   saveSettings as saveSettingsToDb,
+  getDiscounts,
+  createDiscount as createDiscountInDb,
+  updateDiscount as updateDiscountInDb,
+  deleteDiscount as deleteDiscountFromDb,
   Certificate, 
   Course, 
   BlogPost, 
@@ -23,8 +31,18 @@ import {
 } from './data-service';
 import { ContactSchema } from './schemas';
 import { revalidatePath } from 'next/cache';
+import { getSupabaseClient } from './supabase';
 
-// Certificate Actions
+async function checkAuth() {
+  const supabase = await getSupabaseClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    throw new Error('Unauthorized');
+  }
+}
+
+// ─── Certificate Actions ────────────────────────────────────────────────────
+
 export async function getCertificates(): Promise<Certificate[]> {
   try {
     return await getCertificatesFromDb();
@@ -36,9 +54,8 @@ export async function getCertificates(): Promise<Certificate[]> {
 
 export async function addCertificate(cert: Certificate) {
   try {
+    await checkAuth();
     await addCertificateToDb(cert);
-    revalidatePath('/admin/certificates');
-    revalidatePath('/verify');
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -49,22 +66,20 @@ export async function addCertificate(cert: Certificate) {
 
 export async function deleteCertificate(id: string) {
   try {
+    await checkAuth();
     await deleteCertificateFromDb(id);
-    revalidatePath('/admin/certificates');
-    revalidatePath('/verify');
     revalidatePath('/', 'layout');
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to delete certificate:', error);
-    return { success: false, error: 'Failed to delete certificate' };
+    return { success: false, error: error?.message || 'Failed to delete certificate' };
   }
 }
 
 export async function updateCertificateAction(id: string, cert: Partial<Certificate>) {
   try {
+    await checkAuth();
     await updateCertificateInDb(id, cert);
-    revalidatePath('/admin/certificates');
-    revalidatePath('/verify');
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -82,7 +97,8 @@ export async function getCertificate(id: string): Promise<Certificate | null> {
   }
 }
 
-// Course Actions
+// ─── Course Actions (Single-Item) ───────────────────────────────────────────
+
 export async function getCoursesAction(): Promise<Course[]> {
   try {
     return await getCourses();
@@ -92,41 +108,50 @@ export async function getCoursesAction(): Promise<Course[]> {
   }
 }
 
-export async function saveCourses(courses: Course[]) {
+export async function createCourseAction(course: Course) {
   try {
-    await saveCoursesToDb(courses);
-    revalidatePath('/courses');
-    revalidatePath('/admin/courses');
-    revalidatePath('/');
+    await checkAuth();
+    await createCourseInDb(course);
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
-    console.error('Failed to save courses:', error);
-    return { success: false, error: 'Failed to save courses' };
+    console.error('Failed to create course:', error);
+    return { success: false, error: 'Failed to create course' };
   }
 }
 
-// Blog Actions
+export async function updateCourseAction(id: string, course: Partial<Course>) {
+  try {
+    await checkAuth();
+    await updateCourseInDb(id, course);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update course:', error);
+    return { success: false, error: 'Failed to update course' };
+  }
+}
+
+export async function deleteCourseAction(id: string) {
+  try {
+    await checkAuth();
+    await deleteCourseFromDb(id);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete course:', error);
+    return { success: false, error: 'Failed to delete course' };
+  }
+}
+
+// ─── Blog Actions (Single-Item) ─────────────────────────────────────────────
+
 export async function getBlogs(): Promise<BlogPost[]> {
   try {
     return await getBlogPosts();
   } catch (error) {
     console.error('Failed to get blogs:', error);
     return [];
-  }
-}
-
-export async function saveBlogs(blogs: BlogPost[]) {
-  try {
-    await saveBlogsToDb(blogs);
-    revalidatePath('/news');
-    revalidatePath('/admin/blogs');
-    revalidatePath('/');
-    revalidatePath('/', 'layout');
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to save blogs:', error);
-    return { success: false, error: 'Failed to save blogs' };
   }
 }
 
@@ -139,12 +164,34 @@ export async function getBlog(id: string): Promise<BlogPost | null> {
   }
 }
 
+export async function createBlogAction(blog: BlogPost) {
+  try {
+    await checkAuth();
+    await createBlogInDb(blog);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to create blog:', error);
+    return { success: false, error: 'Failed to create blog' };
+  }
+}
+
+export async function updateBlogAction(id: string, blog: Partial<BlogPost>) {
+  try {
+    await checkAuth();
+    await updateBlogInDb(id, blog);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update blog:', error);
+    return { success: false, error: 'Failed to update blog' };
+  }
+}
+
 export async function deleteBlogAction(id: string) {
   try {
+    await checkAuth();
     await deleteBlogFromDb(id);
-    revalidatePath('/news');
-    revalidatePath('/admin/blogs');
-    revalidatePath('/');
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -153,7 +200,8 @@ export async function deleteBlogAction(id: string) {
   }
 }
 
-// Settings Actions
+// ─── Settings Actions (Singleton) ───────────────────────────────────────────
+
 export async function getSettings(): Promise<SiteSettings | null> {
   try {
     return await getSiteSettings();
@@ -165,10 +213,8 @@ export async function getSettings(): Promise<SiteSettings | null> {
 
 export async function saveSettings(settings: SiteSettings) {
   try {
+    await checkAuth();
     await saveSettingsToDb(settings);
-    revalidatePath('/');
-    revalidatePath('/contact');
-    revalidatePath('/admin/settings');
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -177,9 +223,9 @@ export async function saveSettings(settings: SiteSettings) {
   }
 }
 
-// Discount Actions
+// ─── Discount Actions (Single-Item) ─────────────────────────────────────────
+
 export async function getDiscountsAction() {
-  const { getDiscounts } = await import('./data-service');
   try {
     return await getDiscounts();
   } catch (error) {
@@ -189,11 +235,9 @@ export async function getDiscountsAction() {
 }
 
 export async function addDiscountAction(discount: Omit<Discount, 'id'>) {
-  const { addDiscount } = await import('./data-service');
   try {
-    await addDiscount(discount);
-    revalidatePath('/admin/discounts');
-    revalidatePath('/');
+    await checkAuth();
+    await createDiscountInDb(discount);
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -203,11 +247,9 @@ export async function addDiscountAction(discount: Omit<Discount, 'id'>) {
 }
 
 export async function deleteDiscountAction(id: string) {
-  const { deleteDiscount } = await import('./data-service');
   try {
-    await deleteDiscount(id);
-    revalidatePath('/admin/discounts');
-    revalidatePath('/');
+    await checkAuth();
+    await deleteDiscountFromDb(id);
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -217,11 +259,9 @@ export async function deleteDiscountAction(id: string) {
 }
 
 export async function updateDiscountAction(id: string, discount: Partial<Discount>) {
-  const { updateDiscount } = await import('./data-service');
   try {
-    await updateDiscount(id, discount);
-    revalidatePath('/admin/discounts');
-    revalidatePath('/');
+    await checkAuth();
+    await updateDiscountInDb(id, discount);
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -230,7 +270,8 @@ export async function updateDiscountAction(id: string, discount: Partial<Discoun
   }
 }
 
-// Contact Form Action
+// ─── Contact Form Action ────────────────────────────────────────────────────
+
 export async function submitContactForm(formData: FormData) {
   // Simulate delay
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -257,13 +298,21 @@ export async function submitContactForm(formData: FormData) {
   return { success: true, message: 'Message sent successfully! We will contact you soon.' };
 }
 
-// Storage Actions
+// ─── Storage Actions ────────────────────────────────────────────────────────
+
 export async function uploadFileAction(bucket: string, fileName: string, formData: FormData) {
   try {
+    await checkAuth();
     const file = formData.get('file') as File;
     if (!file) {
       console.error(`[uploadFileAction] File missing in formData for bucket: ${bucket}, filename: ${fileName}`);
       throw new Error('No file provided');
+    }
+
+    // Validate bucket name to only allow known buckets
+    const allowedBuckets = ['certificates', 'blogs', 'course_images', 'blog_images'];
+    if (!allowedBuckets.includes(bucket)) {
+      throw new Error(`Invalid bucket: ${bucket}`);
     }
 
     const path = `${Date.now()}-${fileName}`;

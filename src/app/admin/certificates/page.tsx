@@ -130,7 +130,7 @@ export default function AdminCertificates() {
       toast.success('Certificate deleted');
       loadCertificates();
     } else {
-      toast.error('Failed to delete');
+      toast.error(result.error || 'Failed to delete certificate');
     }
   }
 
@@ -402,6 +402,18 @@ export default function AdminCertificates() {
                   )}
                 </div>
               </div>
+              {editingCert.imageUrl && (
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Current Certificate Preview</label>
+                  <div className="w-full max-w-md aspect-[1.414/1] bg-gray-50 border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center p-2">
+                    <img 
+                      src={editingCert.imageUrl} 
+                      alt="Certificate Preview" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">

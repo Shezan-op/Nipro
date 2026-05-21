@@ -38,37 +38,38 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // Clear cookie
-    document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; Secure';
+    document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
     router.push('/');
   };
 
   return (
     <div className={cn(
-      "bg-slate-900 h-screen fixed left-0 top-0 text-white flex flex-col transition-all duration-300 z-50",
+      "bg-zinc-50 border-r border-zinc-200/60 h-screen fixed left-0 top-0 text-zinc-900 flex flex-col transition-all duration-300 z-50 shadow-sm",
       isCollapsed ? "w-16" : "w-64"
     )}>
-      <div className="p-4 flex items-center justify-between border-b border-white/5">
+      <div className="p-4 flex items-center justify-between border-b border-zinc-200/50">
         {!isCollapsed && (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-auto flex items-center justify-center overflow-hidden shrink-0">
-              <img 
+            <div className="relative h-9 w-[55px] shrink-0">
+              <Image 
                 src="/Logo.png" 
                 alt="Nipro Logo" 
-                className="h-8 w-auto object-contain" 
+                fill
+                sizes="55px"
+                className="object-contain" 
               />
             </div>
             <div>
-              <h1 className="font-bold text-lg tracking-tight">NIPRO</h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] opacity-60">Admin</p>
+              <h1 className="font-extrabold text-sm tracking-tight text-slate-950">NIPRO</h1>
+              <p className="text-[9px] uppercase tracking-[0.2em] font-semibold text-slate-500">Admin</p>
             </div>
           </div>
         )}
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)} 
-          className={cn("p-2 rounded-lg hover:bg-white/10", isCollapsed && "mx-auto")}
+          className={cn("p-2 rounded-lg hover:bg-zinc-200/60 text-zinc-500 hover:text-zinc-900 transition-colors", isCollapsed && "mx-auto")}
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-4 w-4" />
         </button>
       </div>
 
@@ -83,36 +84,36 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center justify-between gap-3 p-3 rounded-xl transition-all duration-200 group",
+                  "flex items-center justify-between gap-3 p-2.5 rounded-lg transition-all duration-150 group text-xs",
                   isActive 
-                    ? "bg-gradient-to-r from-nipro-red to-red-700 text-white font-medium" 
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-nipro-blue/10 text-nipro-blue font-semibold shadow-sm border border-nipro-blue/[0.04]" 
+                    : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/40 font-medium"
                 )}
               >
                 <div className={cn("flex items-center gap-3", isCollapsed && "mx-auto justify-center")}>
                   <Icon className={cn(
-                    "h-5 w-5 transition-transform duration-300",
-                    !isActive && "group-hover:scale-110 text-slate-500 group-hover:text-nipro-red"
+                    "h-4 w-4 transition-transform duration-300",
+                    isActive ? "text-nipro-blue" : "text-zinc-400 group-hover:scale-105 group-hover:text-zinc-800"
                   )} />
-                  {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                  {!isCollapsed && <span>{item.label}</span>}
                 </div>
-                {isActive && !isCollapsed && <ChevronRight className="h-4 w-4 text-nipro-red" />}
+                {isActive && !isCollapsed && <ChevronRight className="h-3 w-3 text-nipro-blue" />}
               </Link>
             );
           })}
         </div>
       </nav>
 
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t border-zinc-200/50">
         <button 
           onClick={handleLogout}
           className={cn(
-            "w-full flex items-center gap-3 p-3 rounded-xl text-slate-300 hover:text-white hover:bg-nipro-red/20 transition-all duration-200 group",
+            "w-full flex items-center gap-3 p-2.5 rounded-lg text-zinc-600 hover:text-red-600 hover:bg-red-50/80 transition-all duration-150 group text-xs",
             isCollapsed && "justify-center"
           )}
         >
-          <LogOut className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-          {!isCollapsed && <span className="font-medium">Exit Admin</span>}
+          <LogOut className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          {!isCollapsed && <span className="font-semibold">Exit Admin</span>}
         </button>
       </div>
     </div>

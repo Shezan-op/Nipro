@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 // Key: IP:Route, Value: { count: number, resetTime: number }
 const rateLimitMap = new Map<string, { count: number, resetTime: number }>()
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || 'unknown'
   const url = request.nextUrl.pathname
 

@@ -9,13 +9,14 @@ import {
   Save, 
   X,
   Loader2,
-  BookOpen
+  BookOpen,
+  Upload
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { getCoursesAction, saveCourses } from '@/lib/actions';
+import { getCoursesAction, createCourseAction, updateCourseAction, deleteCourseAction, uploadFileAction } from '@/lib/actions';
 import { Course } from '@/lib/data-service';
 import { CourseSchema } from '@/lib/schemas';
 import { z } from 'zod';
@@ -28,6 +29,7 @@ export default function AdminCourses() {
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [formState, setFormState] = useState<Course | null>(null);
+  const [courseFile, setCourseFile] = useState<File | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -42,28 +44,36 @@ export default function AdminCourses() {
     return () => { mounted = false; };
   }, []);
 
+  const reloadCourses = async () => {
+    const data = await getCoursesAction();
+    setCourses(data);
+  };
+
   const handleEdit = (course: Course) => {
     setEditingCourse(course);
     setIsAddingCourse(false);
     setFormState({ ...course });
+    setCourseFile(null);
   };
 
   const handleCancelForm = () => {
     setIsAddingCourse(false);
     setEditingCourse(null);
     setFormState(null);
+    setCourseFile(null);
   };
 
   const startAdding = () => {
     setIsAddingCourse(true);
     setEditingCourse(null);
+    setCourseFile(null);
     setFormState({
       id: '',
       name: '',
       category: '',
       duration: '',
       shortDescription: '',
-      longDescription: '',
+      description: '',
       mode: 'Both',
       certification: true,
       status: 'Active',
@@ -84,26 +94,41 @@ export default function AdminCourses() {
     }
 
     setSaving(true);
-    
-    let updatedCourses;
+
+    let finalImage = formState.image;
+
+    // Handle file upload for course image
+    if (courseFile) {
+      const formData = new FormData();
+      formData.append('file', courseFile);
+      const uploadResult = await uploadFileAction('course_images', courseFile.name, formData);
+      if (uploadResult.success && uploadResult.url) {
+        finalImage = uploadResult.url;
+      } else {
+        toast.error('Image upload failed. Using existing image.');
+      }
+    }
+
+    const courseToSave = { ...formState, image: finalImage };
+
+    let result;
     if (isAddingCourse) {
       if (courses.some(c => c.id.toLowerCase() === formState.id.toLowerCase())) {
         toast.error('A course with this ID already exists');
         setSaving(false);
         return;
       }
-      updatedCourses = [formState, ...courses];
+      result = await createCourseAction(courseToSave);
     } else {
-      updatedCourses = courses.map(c => c.id === formState.id ? formState : c);
+      result = await updateCourseAction(courseToSave.id, courseToSave);
     }
 
-    const result = await saveCourses(updatedCourses);
-    
     if (result.success) {
-      setCourses(updatedCourses);
+      await reloadCourses();
       setIsAddingCourse(false);
       setEditingCourse(null);
       setFormState(null);
+      setCourseFile(null);
       toast.success(isAddingCourse ? 'Course added' : 'Course updated');
     } else {
       toast.error('Failed to save course');
@@ -113,10 +138,9 @@ export default function AdminCourses() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this course?')) return;
-    const updatedCourses = courses.filter(c => c.id !== id);
-    const result = await saveCourses(updatedCourses);
+    const result = await deleteCourseAction(id);
     if (result.success) {
-      setCourses(updatedCourses);
+      await reloadCourses();
       toast.success('Course deleted');
     } else {
       toast.error('Failed to delete course');
@@ -200,7 +224,7 @@ export default function AdminCourses() {
                 <Input 
                   placeholder="e.g. 4500"
                   type="number"
-                  value={formState?.price !== undefined ? formState.price : ''}
+                  value={formState?.price !== undefined && formState?.price !== null ? formState.price : ''}
                   onChange={e => setFormState({...formState!, price: e.target.value ? parseFloat(e.target.value) : undefined})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
                 />
@@ -210,7 +234,7 @@ export default function AdminCourses() {
                 <Input 
                   placeholder="e.g. 6000"
                   type="number"
-                  value={formState?.originalPrice !== undefined ? formState.originalPrice : ''}
+                  value={formState?.originalPrice !== undefined && formState?.originalPrice !== null ? formState.originalPrice : ''}
                   onChange={e => setFormState({...formState!, originalPrice: e.target.value ? parseFloat(e.target.value) : undefined})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
                 />
@@ -250,13 +274,24 @@ export default function AdminCourses() {
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Course Image URL</label>
-                <Input 
-                  placeholder="e.g. /images/courses/tally.jpg"
-                  value={formState?.image || ''}
-                  onChange={e => setFormState({...formState!, image: e.target.value})}
-                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
-                />
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Course Image</label>
+                <div className="flex items-center gap-4">
+                  <Input 
+                    type="file"
+                    onChange={e => setCourseFile(e.target.files?.[0] || null)}
+                    className="h-12 border-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-nipro-blue/10 file:text-nipro-blue hover:file:bg-nipro-blue/20"
+                    accept="image/*"
+                  />
+                  {courseFile && (
+                    <p className="text-xs text-nipro-blue font-medium bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1">
+                      <Upload className="h-3 w-3" />
+                      {courseFile.name}
+                    </p>
+                  )}
+                </div>
+                {!courseFile && formState?.image && (
+                  <p className="text-[10px] text-gray-400 truncate">Current: {formState.image}</p>
+                )}
               </div>
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Short Description (Displays in list)</label>
@@ -268,12 +303,18 @@ export default function AdminCourses() {
                 />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Detailed Description (Optional)</label>
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">
+                  Description (Max 500 characters)
+                  <span className="ml-2 text-xs font-normal text-slate-400">
+                    {(formState?.description || '').length}/500
+                  </span>
+                </label>
                 <textarea
-                  placeholder="Enter the full syllabus, detailed description, and learning outcomes..."
-                  value={formState?.longDescription || ''}
-                  onChange={e => setFormState({...formState!, longDescription: e.target.value})}
-                  className="w-full min-h-[140px] p-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                  placeholder="Enter a description for the course detail page..."
+                  value={formState?.description || ''}
+                  onChange={e => setFormState({...formState!, description: e.target.value})}
+                  maxLength={500}
+                  className="w-full min-h-[120px] p-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
                 />
               </div>
             </div>

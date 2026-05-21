@@ -2,7 +2,6 @@ import { getBlog } from "@/lib/actions";
 import { Calendar, ArrowLeft, Share2, Globe, MessageCircle, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
@@ -68,13 +67,11 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
           </header>
 
           <div className="relative aspect-video md:aspect-[21/9] rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-12 shadow-2xl">
-            <Image 
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
               src={blog.coverImage || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop'} 
               alt={blog.title}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           </div>
 

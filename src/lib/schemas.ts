@@ -6,6 +6,7 @@ export const CourseSchema = z.object({
   category: z.string().min(1, "Category is required"),
   duration: z.string().min(1, "Duration is required"),
   shortDescription: z.string().min(10, "Description must be at least 10 characters"),
+  description: z.string().max(500, "Description must be 500 characters or fewer").optional(),
   mode: z.enum(["Online", "Offline", "Both"]),
   certification: z.boolean(),
   status: z.enum(["Active", "Inactive"]),

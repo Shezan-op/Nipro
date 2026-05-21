@@ -28,47 +28,51 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <div className="bg-white">
-      <section className="bg-nipro-blue py-20 text-white text-center">
-        <div className="container mx-auto px-4">
-          <HelpCircle className="h-16 w-16 text-nipro-red mx-auto mb-6 opacity-80" />
-          <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
-          <p className="text-blue-100 max-w-2xl mx-auto opacity-90">
+    <div className="bg-[#FAFAFB]">
+      {/* Header - Minimalist Apple Design */}
+      <section className="bg-[#F5F5F7] border-b border-black/[0.04] pt-32 pb-20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 h-[300px] w-[300px] bg-nipro-red/5 rounded-full blur-[80px] -mr-16 -mt-16"></div>
+        <div className="container mx-auto px-4 text-center max-w-2xl relative z-10">
+          <span className="inline-block bg-nipro-blue/10 text-nipro-blue px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide mb-3 uppercase">
+            FAQ
+          </span>
+          <h1 className="text-4xl font-extrabold mb-4 text-slate-950 tracking-tight">Frequently Asked Questions</h1>
+          <p className="text-slate-500 text-sm leading-relaxed">
             Find answers to common questions about our courses, certification, and learning process.
           </p>
         </div>
       </section>
 
       <section className="py-20">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <Accordion type="single" collapsible className="w-full space-y-4">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <Accordion type="single" collapsible className="w-full space-y-3">
             {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`} className="border-none bg-gray-50 rounded-2xl px-6">
-                <AccordionTrigger className="text-left font-bold text-nipro-blue hover:text-nipro-red hover:no-underline py-6">
+              <AccordionItem key={index} value={`item-${index}`} className="border border-black/[0.03] bg-white rounded-2xl px-6 shadow-sm">
+                <AccordionTrigger className="text-left font-semibold text-slate-800 hover:text-nipro-red hover:no-underline py-5 text-sm tracking-tight">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
+                <AccordionContent className="text-slate-500 pb-5 leading-relaxed text-xs font-medium">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
 
-          <div className="mt-20 p-10 bg-nipro-blue rounded-3xl text-white text-center shadow-xl">
-             <h2 className="text-2xl font-bold mb-4">Still have questions?</h2>
-             <p className="text-blue-100 mb-8">
+          <div className="mt-20 p-8 bg-white rounded-3xl border border-black/[0.04] text-center shadow-sm max-w-lg mx-auto">
+             <h2 className="text-xl font-bold mb-2 text-slate-950">Still have questions?</h2>
+             <p className="text-slate-500 mb-6 text-xs font-medium">
                Our team is ready to help you with any queries you might have.
              </p>
-             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" className="bg-nipro-red font-bold h-14 px-8 w-full sm:w-auto">
-                  <a href="tel:+919000000000">
-                    <Phone className="mr-2 h-5 w-5" />
+             <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button asChild size="lg" className="bg-slate-950 hover:bg-slate-900 text-white font-semibold h-10 px-6 rounded-full text-xs tracking-wide shadow-sm w-full sm:w-auto">
+                  <a href="tel:+919000000000" className="flex items-center justify-center">
+                    <Phone className="mr-1.5 h-4 w-4" />
                     Call Us
                   </a>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="bg-transparent border-2 border-white/20 text-white hover:bg-white/10 font-bold h-14 px-8 w-full sm:w-auto">
-                  <a href="https://wa.me/919000000000">
-                    <MessageCircle className="mr-2 h-5 w-5" />
+                <Button asChild variant="outline" size="lg" className="bg-white hover:bg-slate-50 text-slate-800 border-slate-200 font-semibold h-10 px-6 rounded-full text-xs tracking-wide w-full sm:w-auto">
+                  <a href="https://wa.me/919000000000" className="flex items-center justify-center">
+                    <MessageCircle className="mr-1.5 h-4 w-4" />
                     WhatsApp
                   </a>
                 </Button>

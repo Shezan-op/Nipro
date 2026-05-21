@@ -33,8 +33,7 @@ export default function AdminLogin() {
       }
 
       if (data.session) {
-        // Set cookie for server actions
-        document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${data.session.expires_in}; SameSite=Lax; Secure`;
+        document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${data.session.expires_in}; SameSite=Lax`;
         
         toast.success('Access Granted. Welcome back!');
         router.push('/admin');

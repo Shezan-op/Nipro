@@ -2,19 +2,17 @@ import React from 'react';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { BlogPost } from '@/lib/data-service';
 import Link from 'next/link';
-import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 
 export function BlogCard({ blog }: { blog: BlogPost }) {
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
       <div className="relative aspect-video overflow-hidden">
-        <Image 
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img 
           src={blog.coverImage || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop'} 
           alt={blog.title}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute top-4 left-4">
           <span className="bg-nipro-red text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-lg">

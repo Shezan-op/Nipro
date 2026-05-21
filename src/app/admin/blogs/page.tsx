@@ -10,15 +10,15 @@ import {
   X,
   Loader2,
   Newspaper,
-  Calendar
+  Calendar,
+  Upload
 } from 'lucide-react';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { getBlogs, saveBlogs, deleteBlogAction } from '@/lib/actions';
+import { getBlogs, createBlogAction, updateBlogAction, deleteBlogAction, uploadFileAction } from '@/lib/actions';
 import { BlogPost } from '@/lib/data-service';
 import { cn } from '@/lib/utils';
 
@@ -44,6 +44,11 @@ export default function AdminBlogs() {
     init();
     return () => { mounted = false; };
   }, []);
+
+  const reloadBlogs = async () => {
+    const data = await getBlogs();
+    setBlogs(data);
+  };
 
   const handleEdit = (blog: BlogPost) => {
     setEditingId(blog.id);
@@ -77,34 +82,29 @@ export default function AdminBlogs() {
       if (blogFile) {
         const formData = new FormData();
         formData.append('file', blogFile);
-        
-        const uploadResult = await import('@/lib/actions').then(m => 
-          m.uploadFileAction('blogs', `${Date.now()}-${blogFile.name}`, formData)
-        );
+        const uploadResult = await uploadFileAction('blog_images', blogFile.name, formData);
 
-        if (uploadResult.success) {
-          finalCoverImage = uploadResult.url!;
+        if (uploadResult.success && uploadResult.url) {
+          finalCoverImage = uploadResult.url;
         } else {
           toast.error('Image upload failed. Using existing or default image.');
         }
       }
 
-      const blogToSave = {
+      const blogToSave: BlogPost = {
         ...editForm,
         coverImage: finalCoverImage
       };
 
-      let updatedBlogs;
+      let result;
       if (isAdding) {
-        updatedBlogs = [blogToSave, ...blogs];
+        result = await createBlogAction(blogToSave);
       } else {
-        updatedBlogs = blogs.map(b => b.id === blogToSave.id ? blogToSave : b);
+        result = await updateBlogAction(blogToSave.id, blogToSave);
       }
-
-      const result = await saveBlogs(updatedBlogs);
       
       if (result.success) {
-        setBlogs(updatedBlogs);
+        await reloadBlogs();
         setEditingId(null);
         setEditForm(null);
         setIsAdding(false);
@@ -125,7 +125,7 @@ export default function AdminBlogs() {
     if (!confirm('Are you sure you want to delete this post?')) return;
     const result = await deleteBlogAction(id);
     if (result.success) {
-      setBlogs(blogs.filter(b => b.id !== id));
+      await reloadBlogs();
       toast.success('Blog post deleted');
     } else {
       toast.error('Failed to delete');
@@ -148,7 +148,7 @@ export default function AdminBlogs() {
   };
 
   const filtered = blogs.filter(b => 
-    b.title.toLowerCase().includes(search.toLowerCase())
+    (b.title || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -184,7 +184,7 @@ export default function AdminBlogs() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Post Title</label>
                 <Input 
-                  value={editForm.title}
+                  value={editForm.title || ''}
                   onChange={e => setEditForm({...editForm, title: e.target.value})}
                   placeholder="Enter a catchy title..."
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
@@ -200,7 +200,8 @@ export default function AdminBlogs() {
                     accept="image/*"
                   />
                   {blogFile && (
-                    <p className="text-xs text-nipro-blue font-medium bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">
+                    <p className="text-xs text-nipro-blue font-medium bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap flex items-center gap-1">
+                      <Upload className="h-3 w-3" />
                       {blogFile.name}
                     </p>
                   )}
@@ -214,7 +215,7 @@ export default function AdminBlogs() {
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Content</label>
               <Textarea 
-                value={editForm.content}
+                value={editForm.content || ''}
                 onChange={e => setEditForm({...editForm, content: e.target.value})}
                 placeholder="Write your blog content here..."
                 className="min-h-[200px] border-gray-200 resize-none focus-visible:ring-nipro-red"
@@ -226,7 +227,7 @@ export default function AdminBlogs() {
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Status</label>
                 <select 
                   className="w-full h-12 rounded-md border border-gray-200 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-nipro-red/20 focus:border-nipro-red"
-                  value={editForm.status}
+                  value={editForm.status || 'Draft'}
                   onChange={e => setEditForm({...editForm, status: e.target.value as 'Published' | 'Draft'})}
                 >
                   <option value="Draft">Draft</option>
@@ -237,7 +238,7 @@ export default function AdminBlogs() {
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Date</label>
                 <Input 
                   type="date"
-                  value={editForm.createdAt}
+                  value={editForm.createdAt || ''}
                   onChange={e => setEditForm({...editForm, createdAt: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
                 />
@@ -303,12 +304,11 @@ export default function AdminBlogs() {
                         <div className="flex gap-4">
                           <div className="h-16 w-24 relative rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
                             {blog.coverImage ? (
-                              <Image 
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img 
                                 src={blog.coverImage} 
                                 alt={blog.title} 
-                                fill
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                className="object-cover" 
+                                className="w-full h-full object-cover" 
                               />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center text-gray-400">

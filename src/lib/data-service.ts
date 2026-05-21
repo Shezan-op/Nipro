@@ -102,15 +102,20 @@ export async function updateCertificate(id: string, cert: Partial<Certificate>):
 
 export async function deleteCertificate(id: string): Promise<void> {
   const supabase = await getSupabaseClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('certificates')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .select();
 
   if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error(`Certificate "${id}" was not deleted. This may be a permissions issue — try logging out and back in.`);
+  }
 }
 
-// Course Functions
+// ─── Course Functions (Single-Item Mutations) ───────────────────────────────
+
 export async function getCourses(): Promise<Course[]> {
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase
@@ -132,7 +137,7 @@ export async function getCourses(): Promise<Course[]> {
     price: course.price,
     originalPrice: course.original_price,
     shortDescription: course.short_description,
-    longDescription: course.long_description,
+    description: course.long_description,
     image: course.image,
     mode: course.mode as 'Online' | 'Offline' | 'Both',
     certification: course.certification,
@@ -163,7 +168,7 @@ export async function getCourseById(id: string): Promise<Course | null> {
     price: data.price,
     originalPrice: data.original_price,
     shortDescription: data.short_description,
-    longDescription: data.long_description,
+    description: data.long_description,
     image: data.image,
     mode: data.mode as 'Online' | 'Offline' | 'Both',
     certification: data.certification,
@@ -171,31 +176,63 @@ export async function getCourseById(id: string): Promise<Course | null> {
   };
 }
 
-export async function saveCourses(courses: Course[]): Promise<void> {
+export async function createCourse(course: Course): Promise<void> {
   const supabase = await getSupabaseClient();
-  const formatted = courses.map(c => ({
-    id: c.id,
-    name: c.name,
-    category: c.category,
-    duration: c.duration,
-    price: c.price,
-    original_price: c.originalPrice,
-    short_description: c.shortDescription,
-    long_description: c.longDescription,
-    image: c.image,
-    mode: c.mode,
-    certification: c.certification,
-    status: c.status
-  }));
-
   const { error } = await supabase
     .from('courses')
-    .upsert(formatted);
+    .insert([{
+      id: course.id,
+      name: course.name,
+      category: course.category,
+      duration: course.duration,
+      price: course.price,
+      original_price: course.originalPrice,
+      short_description: course.shortDescription,
+      long_description: course.description,
+      image: course.image,
+      mode: course.mode,
+      certification: course.certification,
+      status: course.status
+    }]);
 
   if (error) throw error;
 }
 
-// Blog Functions
+export async function updateCourse(id: string, course: Partial<Course>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const updateData: Record<string, unknown> = {};
+  if (course.name !== undefined) updateData.name = course.name;
+  if (course.category !== undefined) updateData.category = course.category;
+  if (course.duration !== undefined) updateData.duration = course.duration;
+  if (course.price !== undefined) updateData.price = course.price;
+  if (course.originalPrice !== undefined) updateData.original_price = course.originalPrice;
+  if (course.shortDescription !== undefined) updateData.short_description = course.shortDescription;
+  if (course.description !== undefined) updateData.long_description = course.description;
+  if (course.image !== undefined) updateData.image = course.image;
+  if (course.mode !== undefined) updateData.mode = course.mode;
+  if (course.certification !== undefined) updateData.certification = course.certification;
+  if (course.status !== undefined) updateData.status = course.status;
+
+  const { error } = await supabase
+    .from('courses')
+    .update(updateData)
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function deleteCourse(id: string): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase
+    .from('courses')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+// ─── Blog Functions (Single-Item Mutations) ──────────────────────────────────
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase
@@ -244,19 +281,33 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
   };
 }
 
-export async function saveBlogs(blogs: BlogPost[]): Promise<void> {
+export async function createBlog(blog: BlogPost): Promise<void> {
   const supabase = await getSupabaseClient();
-  const formatted = blogs.map(b => ({
-    id: b.id,
-    title: b.title,
-    cover_image: b.coverImage,
-    content: b.content,
-    status: b.status
-  }));
+  const { error } = await supabase
+    .from('blogs')
+    .insert([{
+      id: blog.id,
+      title: blog.title,
+      cover_image: blog.coverImage,
+      content: blog.content,
+      status: blog.status
+    }]);
+
+  if (error) throw error;
+}
+
+export async function updateBlog(id: string, blog: Partial<BlogPost>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const updateData: Record<string, unknown> = {};
+  if (blog.title !== undefined) updateData.title = blog.title;
+  if (blog.coverImage !== undefined) updateData.cover_image = blog.coverImage;
+  if (blog.content !== undefined) updateData.content = blog.content;
+  if (blog.status !== undefined) updateData.status = blog.status;
 
   const { error } = await supabase
     .from('blogs')
-    .upsert(formatted);
+    .update(updateData)
+    .eq('id', id);
 
   if (error) throw error;
 }
@@ -271,7 +322,8 @@ export async function deleteBlog(id: string): Promise<void> {
   if (error) throw error;
 }
 
-// Discount Functions
+// ─── Discount Functions (Single-Item Mutations) ─────────────────────────────
+
 export async function getDiscounts(): Promise<Discount[]> {
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase
@@ -295,7 +347,7 @@ export async function getDiscounts(): Promise<Discount[]> {
   }));
 }
 
-export async function addDiscount(discount: Omit<Discount, 'id'>): Promise<void> {
+export async function createDiscount(discount: Omit<Discount, 'id'>): Promise<void> {
   const supabase = await getSupabaseClient();
   const { error } = await supabase
     .from('discounts')
@@ -305,6 +357,22 @@ export async function addDiscount(discount: Omit<Discount, 'id'>): Promise<void>
       percentage: discount.percentage,
       valid_until: discount.validUntil
     }]);
+
+  if (error) throw error;
+}
+
+export async function updateDiscount(id: string, discount: Partial<Discount>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const updateData: Record<string, unknown> = {};
+  if (discount.title !== undefined) updateData.title = discount.title;
+  if (discount.description !== undefined) updateData.description = discount.description;
+  if (discount.percentage !== undefined) updateData.percentage = discount.percentage;
+  if (discount.validUntil !== undefined) updateData.valid_until = discount.validUntil;
+
+  const { error } = await supabase
+    .from('discounts')
+    .update(updateData)
+    .eq('id', id);
 
   if (error) throw error;
 }
@@ -319,23 +387,8 @@ export async function deleteDiscount(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function updateDiscount(id: string, discount: Partial<Discount>): Promise<void> {
-  const supabase = await getSupabaseClient();
-  const updateData: any = {};
-  if (discount.title !== undefined) updateData.title = discount.title;
-  if (discount.description !== undefined) updateData.description = discount.description;
-  if (discount.percentage !== undefined) updateData.percentage = discount.percentage;
-  if (discount.validUntil !== undefined) updateData.valid_until = discount.validUntil;
+// ─── Settings Functions (Singleton Update Only) ──────────────────────────────
 
-  const { error } = await supabase
-    .from('discounts')
-    .update(updateData)
-    .eq('id', id);
-
-  if (error) throw error;
-}
-
-// Settings Functions
 export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase
@@ -369,17 +422,20 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
 export async function saveSettings(settings: SiteSettings): Promise<void> {
   const supabase = await getSupabaseClient();
-  const { error } = await supabase
-    .from('site_settings')
-    .upsert({
-      key: 'main_config',
-      value: settings
-    });
 
-  if (error) throw error;
+  const { error: updateError } = await supabase
+    .from('site_settings')
+    .update({ value: settings })
+    .eq('key', 'main_config');
+
+  if (updateError) {
+    console.error('Error updating site_settings:', updateError);
+    throw updateError;
+  }
 }
 
-// Storage Functions
+// ─── Storage Functions ───────────────────────────────────────────────────────
+
 export async function uploadFile(bucket: string, path: string, file: File): Promise<string> {
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase.storage

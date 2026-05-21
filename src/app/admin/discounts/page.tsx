@@ -19,6 +19,15 @@ import { toast } from 'sonner';
 import { getDiscountsAction, addDiscountAction, deleteDiscountAction, updateDiscountAction } from '@/lib/actions';
 import { Discount } from '@/lib/types';
 
+function formatDateForInput(dateStr?: string) {
+  if (!dateStr) return '';
+  try {
+    return new Date(dateStr).toISOString().split('T')[0];
+  } catch (e) {
+    return '';
+  }
+}
+
 export default function AdminDiscounts() {
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +60,10 @@ export default function AdminDiscounts() {
   const handleEdit = (discount: Discount) => {
     setEditingDiscount(discount);
     setIsAdding(false);
-    setFormState({ ...discount });
+    setFormState({ 
+      ...discount,
+      validUntil: formatDateForInput(discount.validUntil)
+    });
   };
 
   const handleCancel = () => {
@@ -67,13 +79,21 @@ export default function AdminDiscounts() {
       title: '',
       description: '',
       percentage: 10,
-      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      validUntil: formatDateForInput(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString())
     });
   };
 
   async function handleSave() {
-    if (!formState || !formState.title || !formState.percentage || !formState.validUntil) {
-      toast.error('Please fill in all required fields');
+    if (
+      !formState || 
+      !formState.title?.trim() || 
+      formState.percentage === undefined || 
+      formState.percentage === null || 
+      isNaN(formState.percentage) || 
+      formState.percentage < 0 || 
+      !formState.validUntil
+    ) {
+      toast.error('Please fill in all required fields (percentage must be 0 or greater)');
       return;
     }
 
@@ -169,8 +189,14 @@ export default function AdminDiscounts() {
                 <Input 
                   type="number"
                   placeholder="e.g. 20"
-                  value={formState.percentage || ''}
-                  onChange={e => setFormState({...formState, percentage: parseInt(e.target.value) || 0})}
+                  value={formState.percentage !== undefined && formState.percentage !== null ? formState.percentage : ''}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setFormState({
+                      ...formState,
+                      percentage: val === '' ? undefined : parseInt(val)
+                    });
+                  }}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
                 />
               </div>

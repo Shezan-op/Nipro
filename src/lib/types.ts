@@ -6,7 +6,7 @@ export interface Course {
   price?: number;
   originalPrice?: number;
   shortDescription: string;
-  longDescription?: string;
+  description?: string;
   image?: string;
   mode: 'Online' | 'Offline' | 'Both';
   certification: boolean;

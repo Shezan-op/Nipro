@@ -27,7 +27,10 @@ export async function getSupabaseClient() {
         },
       });
     }
-  } catch (e) {
+  } catch (e: any) {
+    if (e && (e.digest === 'DYNAMIC_SERVER_USAGE' || e.message?.includes('Dynamic server usage') || e.message?.includes('dynamic-server-error'))) {
+      throw e;
+    }
     console.error('Error creating server Supabase client:', e);
   }
 

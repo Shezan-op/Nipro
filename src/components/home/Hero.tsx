@@ -11,12 +11,12 @@ import { SiteSettings } from '@/lib/data-service';
 export function Hero({ settings }: { settings?: SiteSettings }) {
   const whatsappUrl = `https://wa.me/${settings?.contact?.whatsapp?.replace(/\D/g, '') || '919000000000'}`;
   return (
-    <section className="relative w-full h-[95vh] min-h-[800px] flex items-center justify-center overflow-hidden bg-slate-950 bg-gradient-to-b from-slate-900 to-slate-950 bg-grid-white-5">
+    <section className="relative w-full py-16 md:py-24 min-h-[calc(100vh-5rem)] flex items-center justify-center bg-slate-950 bg-gradient-to-b from-slate-900 to-slate-950 bg-grid-white-5">
       {/* Soft Radial Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(214,31,38,0.08),transparent_70%)] pointer-events-none" />
 
       {/* Content Layer */}
-      <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center">
         {/* Centered Logo - Premium Placement */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -24,16 +24,14 @@ export function Hero({ settings }: { settings?: SiteSettings }) {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="mb-12"
         >
-          <div className="relative w-[320px] sm:w-[500px] aspect-[652/413]">
-            <Image
-              src="/images/Logo.png"
-              alt="Nipro Computer Education"
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain drop-shadow-[0_0_40px_rgba(214,31,38,0.4)]"
-              priority
-            />
-          </div>
+          <Image
+            src="/images/Logo.png"
+            alt="Nipro Computer Education"
+            width={632}
+            height={413}
+            className="w-[320px] sm:w-[500px] h-auto object-contain drop-shadow-[0_0_40px_rgba(214,31,38,0.4)] animate-fade-in"
+            priority
+          />
         </motion.div>
 
         {/* Messaging Area */}
@@ -70,7 +68,7 @@ export function Hero({ settings }: { settings?: SiteSettings }) {
             transition={{ duration: 0.8, delay: 0.8 }}
             className="text-lg sm:text-2xl text-slate-300 max-w-2xl mx-auto mb-12 font-medium leading-relaxed tracking-tight"
           >
-            Empowering 1000+ students in Korutla with job-ready skills in Design, Accounting, and IT. Get certified by the experts.
+            Empowering 20,000+ students in Korutla with job-ready skills in Design, Accounting, and IT. Get certified by the experts.
           </motion.p>
 
           {/* Conversion-Focused CTAs */}
@@ -102,7 +100,7 @@ export function Hero({ settings }: { settings?: SiteSettings }) {
           transition={{ duration: 1, delay: 1.3 }}
           className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-12 max-w-4xl w-full border-t border-white/10 pt-10"
         >
-          <TrustBadge icon={<Users className="h-6 w-6" />} value="1000+" label="Alumni Success Stories" />
+          <TrustBadge icon={<Users className="h-6 w-6" />} value="20,000+" label="Alumni Success Stories" />
           <TrustBadge icon={<Award className="h-6 w-6" />} value="15+" label="Industry-Standard Modules" />
           <TrustBadge icon={<ShieldCheck className="h-6 w-6" />} value="100%" label="Verified Certifications" />
         </motion.div>

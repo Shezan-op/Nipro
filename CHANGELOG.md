@@ -1,5 +1,63 @@
 # Changelog
 
+## Phase 18: Certificate Delete Fix & Sync Verification (2026-05-21)
+
+### Bug Fixes
+- **Certificate Delete Logic**: Fixed silent delete failures in `data-service.ts`. The old `.delete().eq('id', id)` never errored when RLS blocked the operation — it silently deleted 0 rows. Now chains `.select()` to verify rows were actually removed and throws a meaningful error if nothing was deleted.
+- **Certificate Delete Error Display**: Updated `actions.ts` to pass through the real error message (expired token, RLS block, etc.) instead of a generic "Failed to delete certificate" string. Updated `certificates/page.tsx` to display the actual error in the toast notification.
+- **Footer Logo Not Rendering**: Removed `brightness-0 invert` CSS filter from the footer logo in `Footer.tsx` that was turning the logo into an invisible white silhouette. Replaced the translucent container (`bg-white/[0.03]`) with a solid white `bg-white` rounded container so the full-color logo renders clearly on the dark footer.
+
+### Verification
+- **Admin → Site Sync**: Verified all 14 server actions include `revalidatePath('/', 'layout')` for cache invalidation. All public data pages use `force-dynamic` for fresh DB reads. Admin client pages refetch via `loadX()` after every mutation. Changes reflect immediately.
+
+## Phase 16: Apple-Inspired Redesign & Security Hardening (2026-05-21)
+
+### Visual Polish
+- **Hero Logo Cut-off Fix**: Changed Hero layout container in `Hero.tsx` from viewport-fixed `h-[95vh] min-h-[800px] overflow-hidden` to dynamic `py-16 md:py-24 min-h-[calc(100vh-5rem)]` layout, removing clipping bounds so the logo renders fully on all screens.
+- **Footer Logo Detail Restoration**: Removed `brightness-0 invert` filter from the footer logo `Image` in `Footer.tsx`, enabling the original colored badge details to be visible on the dark background.
+- **Naksha Section Redesign**: Redesigned Naksha section in `page.tsx` using Apple dark card UI principles (`bg-[#1C1C1E]`, subtle borders `border-white/[0.06]`, and corner radius `rounded-[24px]`). Removed the `"Sister Company"` badge and refactored the CTA into a clean solid white pill button.
+
+### Security Hardening
+- **Server Actions Authentication**: Added a server-side session check `checkAuth()` utilizing `supabase.auth.getUser()` inside `actions.ts`. Hardened all database write/delete actions and file uploads (`addCertificate`, `deleteCertificate`, `updateCertificateAction`, `createCourseAction`, `updateCourseAction`, `deleteCourseAction`, `createBlogAction`, `updateBlogAction`, `deleteBlogAction`, `saveSettings`, `addDiscountAction`, `deleteDiscountAction`, `updateDiscountAction`, `uploadFileAction`) to verify admin authentication.
+
+## Phase 15: Visual Cleanup & Naksha Integration (2026-05-21)
+
+### Visual Cleanup
+- **Course Filter Bar Overlap & Collapse Fix**: Refactored the category filter bar in `CourseList.tsx`. Built a collapsible mobile filter layout toggled by a "Filters" button, containing a clear "X" (close) button and a "Clear Filter" action. This prevents the category bar from wrapping and overriding the course list on mobile devices.
+- **"ELEVATE YOUR POTENTIAL" Redesign**: Transformed flat blue hero background in `courses/page.tsx` into a premium deep dark theme (`bg-slate-950`) with radial gradient textures.
+- **Logo Aspect Ratio & Dimensions Fix**: Manually checked and verified logo dimensions as `632 x 413` pixels. Replaced raw `<img>` tags in `Navbar.tsx`, `Footer.tsx`, and `AdminSidebar.tsx` with responsive Next.js `<Image>` components using a parent container set to the precise native aspect ratio (632:413 / `w-[61px] h-10`). Corrected homepage hero logo aspect ratio in `Hero.tsx` from `aspect-[652/413]` to `aspect-[632/413]`.
+
+### Integrations & Copy
+- **"Naksha" Sister Company section**: Integrated a sleek dark-themed banner for sister company Naksha with description and logo in `page.tsx`.
+- **Global stats update**: Changed every instance of student statistics from "1000+" to "20,000+" in `settings.json` and `page.tsx` to accurately reflect growth.
+
+## Phase 13: Enterprise CMS Architecture (2026-05-21)
+
+### Architecture Overhaul
+- **Singleton Settings Fix (RLS 42501)**: Rewrote `saveSettings` to strictly UPDATE the existing master row instead of upserting, preventing RLS policy violations.
+- **Single-Item Mutations**: Replaced bulk `saveCourses`/`saveBlogs` with granular `createCourse`/`updateCourse`/`deleteCourse` and `createBlog`/`updateBlog`/`deleteBlog` mutations in both `data-service.ts` and `actions.ts`.
+- **Cache Invalidation**: Every Server Action now ends with `revalidatePath('/', 'layout')` for full cache wipe.
+
+### Schema & Type Changes
+- **Removed `longDescription`**: Replaced with `description` field (max 500 chars) in Course type, schema, data-service, and all admin UI.
+- **CourseSchema**: Added `description` with `.max(500)` validation.
+
+### Admin UI Fixes
+- **Uncontrolled Input Fix**: All form inputs now default to empty strings (e.g., `value={data.title || ""}`) to prevent React uncontrolled→controlled crashes.
+- **Course Image Upload**: Replaced text URL input with file upload to `course_images` Supabase bucket.
+- **Blog Image Upload**: Updated blog form to upload to `blog_images` bucket (was using `blogs` bucket).
+- **Removed `long_description` textarea**: Course admin form now only shows `description` with maxLength={500}.
+
+### Storage Infrastructure
+- **New Buckets**: Created `course_images` and `blog_images` public storage buckets in Supabase.
+- **RLS Policies**: Set SELECT (public), INSERT, UPDATE, DELETE policies on both buckets.
+- **Bucket Validation**: `uploadFileAction` now validates bucket name against whitelist.
+
+### Public Frontend
+- **Image Rendering**: Switched all dynamic images (BlogCard, CourseCard, blog detail) from Next.js `<Image>` to native `<img>` to bypass unconfigured host errors for user-uploaded Supabase URLs.
+- **Hero Stats**: Updated alumni count from "1,000+" to "20,000+" in Hero component and trust badges.
+
+
 ## Phase 9: Premium Ed-Tech Homepage Transformation
 - **Alumni/Placement Strip**: Added a minimalist strip (`bg-slate-50`) with grayscale company logos (TCS, Wipro, Infosys, HDFC Bank).
 - **Learning Pathway**: Implemented a 3-step card-based flow (Fundamentals → Projects → Govt. Certification).
