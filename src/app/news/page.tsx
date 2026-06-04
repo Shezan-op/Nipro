@@ -6,8 +6,7 @@ import Link from "next/link";
 export const dynamic = 'force-dynamic';
 
 export default async function NewsPage() {
-  const allBlogs = await getBlogPosts();
-  const publishedBlogs = allBlogs.filter(blog => blog.status === 'Published');
+  const publishedBlogs = await getBlogPosts(true);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 md:pt-28 pb-16 md:pb-24">

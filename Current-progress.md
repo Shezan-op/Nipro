@@ -13,7 +13,9 @@ In May 2026, we transformed a basic mock into a premium, high-conversion landing
 - **Conversion-Focused Copywriting**: Replaced developer-centric jargon with empathetic, action-oriented CTAs (e.g., "Verify Your Certificate Instantly" vs "Validate ID").
 - **Course List Overhaul**: Redesigned the entire course catalog with a premium sticky filter bar, glassmorphism card accents, and high-impact "Discount Logic" UI (Save X% badges).
 - **Visual Polish**: Added glassmorphism to the Navbar, brand-colored glow effects, and scroll-reveal animations across all sections.
-
+- **Enterprise Promo Engine (Phase 21)**: Overhauled the discount system with a robust rules engine supporting percentage, flat amount, and fixed price types, conflict detection, and dynamic UI surfaces (Top Bar, Popup, Soft Reminder).
+- **Dynamic Contact Integrations**: Added a "WhatsApp Community" section drawing contact numbers dynamically from global settings instead of hardcoded links.
+- **Faculty Management**: Implemented an instructor profiles system (`/admin/faculty`) tracking roles, bios, and headshots, displayed dynamically on the homepage.
 
 ---
 
@@ -39,6 +41,7 @@ In May 2026, we transformed a basic mock into a premium, high-conversion landing
 - **Refactoring**: Standardized `useEffect` patterns with cleanup flags and deferred state updates to prevent memory leaks and hydration issues.
 - **Cleanup**: Removed unused dependencies and standardized data initialization patterns.
 - **Standardization**: Fixed duplicate entries and formatting in `Courses-list.md`. Cleaned up `CHANGELOG.md`.
+- **Promo Architecture**: Replaced raw frontend math with a pure `calculateFinalPrice` function enforcing database-level caps and minimum floors.
 
 ---
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getCourses } from '@/lib/data-service';
+import { getCourses, getDiscounts, getSiteSettings, SiteSettings, Discount } from '@/lib/data-service';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { CourseList } from '@/components/courses/CourseList';
@@ -7,8 +7,16 @@ import { CourseList } from '@/components/courses/CourseList';
 export const dynamic = 'force-dynamic';
 
 export default async function CoursesPage() {
-  const courses = await getCourses();
+  const [courses, discountsData, settings] = await Promise.all([
+    getCourses(),
+    getDiscounts(),
+    getSiteSettings()
+  ]);
   const categories = Array.from(new Set(courses.map(c => c.category)));
+
+  // Filter only active discounts
+  const activeDiscounts = discountsData.filter(d => d.is_active && new Date(d.starts_at) <= new Date() && new Date(d.ends_at) >= new Date());
+  const whatsappUrl = `https://wa.me/${(settings as SiteSettings)?.contact?.whatsapp?.replace(/\D/g, '') || (settings as SiteSettings)?.contact?.phone?.replace(/\D/g, '') || '919000000000'}`;
 
   return (
     <div className="bg-[#FAFAFB]">
@@ -33,7 +41,7 @@ export default async function CoursesPage() {
         </div>
       </section>
 
-      <CourseList initialCourses={courses} categories={categories} />
+      <CourseList initialCourses={courses} categories={categories} discounts={activeDiscounts} settings={settings as SiteSettings} />
 
       {/* CTA */}
       <section className="py-24 bg-white border-t border-black/[0.04]">
@@ -47,10 +55,10 @@ export default async function CoursesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button asChild size="lg" className="bg-nipro-red hover:bg-nipro-red/90 text-white h-12 px-8 rounded-full font-semibold text-base transition-all duration-300">
-              <Link href="tel:+919000000000">Call Counselor</Link>
+              <Link href={`tel:+91${(settings as SiteSettings)?.contact?.phone?.replace(/\D/g, '') || '9000000000'}`}>Call Counselor</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 h-12 px-8 rounded-full font-semibold text-base transition-all duration-300">
-              <Link href="https://wa.me/919000000000">Chat on WhatsApp</Link>
+              <Link href={whatsappUrl}>Chat on WhatsApp</Link>
             </Button>
           </div>
         </div>

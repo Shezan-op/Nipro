@@ -1,0 +1,26 @@
+{
+  "name": "Nipro Computer Education",
+  "short_name": "Nipro",
+  "description": "Govt. recognised computer education centre in Korutla, Telangana.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#d61f26",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/Logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education"],
+  "lang": "en-IN"
+}

@@ -4,20 +4,26 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Megaphone, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Discount } from '@/lib/types';
 
 interface PromotionalBannerProps {
+  discount: Discount;
   onClose?: () => void;
 }
 
-export function PromotionalBanner({ onClose }: PromotionalBannerProps) {
+export function PromotionalBanner({ discount, onClose }: PromotionalBannerProps) {
   return (
     <div className="bg-nipro-red text-white py-3 relative">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-center gap-2 text-center sm:text-left">
         <div className="flex items-center gap-2">
           <Megaphone className="h-5 w-5 animate-pulse" />
-          <span className="font-bold">Special Offer:</span>
+          <span className="font-bold">{discount.title || 'Special Offer'}:</span>
         </div>
-        <span>Flat 20% off on all Advanced Diploma courses this month!</span>
+        <span>
+          {discount.discount_type === 'percentage' ? `Flat ${discount.discount_value}% off` : 
+           discount.discount_type === 'flat' ? `Flat ₹${discount.discount_value} off` : 
+           `Just ₹${discount.discount_value}`} {discount.description ? `- ${discount.description}` : 'on selected courses this month!'}
+        </span>
         <Button size="sm" variant="outline" className="text-white border-white hover:bg-white hover:text-nipro-red font-bold text-xs h-7 px-3 mt-1 sm:mt-0 sm:ml-4">
           Claim Now
         </Button>

@@ -8,12 +8,17 @@ import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CourseCard } from './CourseCard';
 
+import { Discount } from '@/lib/types';
+import { SiteSettings } from '@/lib/data-service';
+
 interface CourseListProps {
   initialCourses: Course[];
   categories: string[];
+  discounts?: Discount[];
+  settings?: SiteSettings;
 }
 
-export function CourseList({ initialCourses, categories }: CourseListProps) {
+export function CourseList({ initialCourses, categories, discounts, settings }: CourseListProps) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showMobileCategories, setShowMobileCategories] = useState(false);
@@ -189,7 +194,7 @@ export function CourseList({ initialCourses, categories }: CourseListProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             <AnimatePresence mode="popLayout">
               {filteredCourses.map((course, index) => (
-                <CourseCard key={course.id} course={course} index={index} />
+                <CourseCard key={course.id} course={course} index={index} discounts={discounts} settings={settings} />
               ))}
             </AnimatePresence>
           </div>

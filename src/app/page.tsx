@@ -1,9 +1,10 @@
 import { Hero } from "@/components/home/Hero";
 import { FeaturedCourses } from "@/components/home/FeaturedCourses";
 import { PromotionalBanner } from "@/components/home/PromotionalBanner";
+import { PromoPopup } from "@/components/home/PromoPopup";
 import { TrustGallery } from "@/components/home/TrustGallery";
 import { BlogCard } from "@/components/home/BlogCard";
-import { getCourses, getBlogPosts, getSiteSettings, BlogPost, SiteSettings } from "@/lib/data-service";
+import { getCourses, getBlogPosts, getSiteSettings, getDiscounts, getFaculty, BlogPost, SiteSettings, Discount, Faculty } from "@/lib/data-service";
 import { Laptop, ShieldCheck, Globe, ArrowRight, Sparkles, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -11,20 +12,34 @@ import Link from "next/link";
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [courses, blogs, settings] = await Promise.all([
+  const [courses, blogs, settings, discountsData, faculty] = await Promise.all([
     getCourses(),
     getBlogPosts(),
     getSiteSettings(),
+    getDiscounts(),
+    getFaculty(),
   ]);
 
-  // Only show the promotional banner if the is_offer_active flag is strictly true
-  const isOfferActive = (settings as unknown as Record<string, unknown>)?.is_offer_active === true;
+  // Filter only active discounts
+  const activeDiscounts = discountsData.filter(d => d.is_active && new Date(d.starts_at) <= new Date() && new Date(d.ends_at) >= new Date());
+
+  // Helper to find discount by surface
+  const getDiscountBySurface = (surface: string) => activeDiscounts.find(d => d.promo_surface === surface) || null;
+  
+  const topBarDiscount = getDiscountBySurface('top_bar');
+  const popupDiscount = getDiscountBySurface('popup');
+  const softReminderDiscount = getDiscountBySurface('soft_reminder');
+  
+  // Use the highest percentage "all" discount for the hero badge, or fallback
+  const heroDiscount = activeDiscounts.find(d => d.applies_to === 'all') || activeDiscounts[0] || null;
 
 
   return (
     <div className="flex flex-col">
-      {isOfferActive && <PromotionalBanner />}
-      <Hero settings={settings as SiteSettings} />
+      {topBarDiscount && <PromotionalBanner discount={topBarDiscount} />}
+      <PromoPopup discount={popupDiscount} settings={settings as SiteSettings} />
+      
+      <Hero settings={settings as SiteSettings} discount={heroDiscount} />
       
       {/* Alumni / Placement Strip */}
       <section className="bg-slate-50 border-b border-gray-200 py-8">
@@ -162,7 +177,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <FeaturedCourses courses={courses} />
+      <FeaturedCourses courses={courses} discounts={activeDiscounts} settings={settings as SiteSettings} />
 
       {/* Why Choose Us */}
       <section className="py-28 bg-white">
@@ -320,66 +335,71 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-nipro-red via-red-600 to-red-700 rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 text-white shadow-2xl relative overflow-hidden">
-            {/* Decorative elements */}
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-black/10 rounded-full blur-xl" />
-            
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold mb-4">
-                <Sparkles className="h-4 w-4" />
-                Limited Time Offer
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Claim Your Spot — 50% Off First Course</h2>
-              <p className="text-red-50 text-lg opacity-90">
-                Join Korutla&apos;s most trusted computer education institute. No experience needed — just bring your ambition.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 relative z-10">
-              <Button asChild className="bg-white text-nipro-red font-bold px-8 py-4 rounded-xl shadow-lg hover:bg-gray-50 hover:shadow-xl transition-all h-14 whitespace-nowrap active:scale-95">
-                <Link href="/courses">Start Learning Today</Link>
-              </Button>
-              <Button asChild className="bg-nipro-blue text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:bg-nipro-blue/90 transition-all h-14 whitespace-nowrap active:scale-95">
-                <Link href="/contact">Talk to Us First</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Naksha Promo Banner - Apple-Inspired Premium Styling */}
-      <section className="my-16 mx-4 md:mx-auto max-w-7xl">
-        <div className="bg-[#1C1C1E] border border-white/[0.06] rounded-[24px] p-8 md:p-12 relative overflow-hidden shadow-[0_24px_60px_-15px_rgba(0,0,0,0.6)] flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Subtle background glow */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-nipro-red/[0.03] rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-blue-500/[0.02] rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="flex-1 z-10 flex flex-col md:flex-row md:items-center gap-6">
-            <div className="bg-white/[0.02] border border-white/[0.05] p-4 rounded-2xl flex items-center justify-center shrink-0 w-24 h-24 shadow-inner">
-              <img 
-                src="/naksha-logo.png" 
-                alt="Naksha Logo" 
-                className="max-h-12 w-auto object-contain brightness-0 invert opacity-80" 
-              />
-            </div>
-            <div>
-              <h2 className="text-2xl md:text-3xl font-semibold text-white mb-2 tracking-tight">
-                Looking for Architectural & Design Services?
-              </h2>
-              <p className="text-zinc-400 text-sm md:text-base max-w-2xl leading-relaxed">
-                Discover Naksha, our premium partner specializing in custom architectural design, interior planning, and 3D elevations.
-              </p>
-            </div>
-          </div>
-          
-          <div className="z-10 shrink-0 w-full md:w-auto">
-            <Button asChild className="rounded-full bg-white hover:bg-zinc-100 text-black font-semibold text-sm px-8 py-3.5 h-12 shadow-sm transition-all active:scale-95 duration-200 w-full md:w-auto text-center flex items-center justify-center border-none">
-              <Link href="/naksha">Visit Naksha</Link>
+      {/* Soft Reminder Block */}
+      {softReminderDiscount && (
+        <section className="bg-red-50/50 border-t border-red-100 py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h3 className="text-2xl font-extrabold text-red-800 mb-4">{softReminderDiscount.title || "Don't Miss Out on This Offer"}</h3>
+            <p className="text-red-700/80 mb-8 max-w-lg mx-auto">
+              {softReminderDiscount.description || "The current batch is filling up. Claim your discount before it expires."}
+            </p>
+            <Button asChild className="bg-[#25d366] hover:bg-[#128c7e] text-white font-bold h-12 px-8 rounded-xl shadow-lg transition-all">
+              <Link href={`https://wa.me/${(settings as SiteSettings)?.contact?.whatsapp?.replace(/\D/g, '') || (settings as SiteSettings)?.contact?.phone?.replace(/\D/g, '')}?text=Hi,%20I'm%20interested%20in%20the%20${encodeURIComponent(softReminderDiscount.title)}%20offer!`} target="_blank">
+                💬 Claim Offer on WhatsApp
+              </Link>
             </Button>
           </div>
+        </section>
+      )}
+
+      {/* Faculty Section */}
+      {faculty.length > 0 && (
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-sm font-bold text-nipro-red uppercase tracking-widest mb-3">Expert Mentors</h2>
+              <h3 className="text-3xl md:text-4xl font-extrabold text-nipro-blue tracking-tight mb-4">Learn From The Best</h3>
+              <p className="text-slate-600 max-w-2xl mx-auto">
+                Our instructors are industry professionals who bring real-world experience directly to the classroom.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {faculty.filter(f => f.is_active).map(f => (
+                <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center transition-transform hover:-translate-y-1 hover:shadow-md">
+                  <div className="w-24 h-24 mx-auto bg-slate-200 rounded-full overflow-hidden border-4 border-white shadow-sm mb-6">
+                    {f.image_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={f.image_url} alt={f.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100 font-bold text-2xl">
+                        {f.name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-900 mb-1">{f.name}</h4>
+                  <div className="text-sm font-bold text-nipro-red mb-4">{f.role}</div>
+                  <p className="text-slate-600 text-sm leading-relaxed">{f.bio}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Final CTA / WhatsApp Community */}
+      <section className="py-24 bg-nipro-blue text-white relative overflow-hidden text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1)_0%,transparent_70%)] pointer-events-none" />
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">Stay Updated with Nipro</h2>
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+            Join our WhatsApp community to get alerts about new courses, upcoming batch dates, and exclusive student offers before anyone else.
+          </p>
+          <Button asChild className="bg-white hover:bg-slate-50 text-nipro-blue font-bold h-14 px-8 rounded-xl shadow-xl transition-all hover:scale-105">
+            <Link href={`https://wa.me/${(settings as SiteSettings)?.contact?.whatsapp?.replace(/\D/g, '') || (settings as SiteSettings)?.contact?.phone?.replace(/\D/g, '')}?text=Hi,%20I%20would%20like%20to%20join%20the%20Nipro%20WhatsApp%20Community!`} target="_blank">
+              💬 Join WhatsApp Community
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

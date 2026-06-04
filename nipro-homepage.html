@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nipro — Homepage Prototype</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111827;line-height:1.6;background:#fff;padding-top:52px}
+
+:root{
+  --red:#dc2626;--red2:#b91c1c;
+  --dark:#09090f;--dark2:#111121;
+  --navy:#1e3a8a;
+  --wa:#25d366;--wa2:#128c7e;
+  --gray:#f9fafb;--gray2:#f3f4f6;
+  --text:#111827;--muted:#6b7280;
+  --border:#e5e7eb;
+  --dev:#f97316;
+}
+
+/* ─── NEW SECTIONS & POPUP ──────────────────────── */
+.sec-faculty{background:#fff}
+.fac-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;margin-top:36px}
+.fac-card{background:var(--gray);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center}
+.fac-img{width:90px;height:90px;border-radius:50%;background:var(--gray2);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;border:1px solid var(--border)}
+.fac-name{font-size:17px;font-weight:800;margin-bottom:4px}
+.fac-role{font-size:12px;color:var(--red);font-weight:700;margin-bottom:12px}
+.fac-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+.sec-community{background:var(--navy);color:#fff;padding:64px 60px;text-align:center}
+.sec-community h2{font-size:32px;font-weight:900;margin-bottom:12px}
+.sec-community p{font-size:15px;color:rgba(255,255,255,.7);margin:0 auto 28px;max-width:500px}
+
+.sec-reminder{background:#fff8f8;border-top:1px solid #fecaca;padding:40px 60px;text-align:center}
+.sec-reminder.off{display:none}
+.sec-reminder h3{font-size:22px;font-weight:800;color:var(--red2);margin-bottom:12px}
+.sec-reminder p{font-size:15px;color:#991b1b;margin-bottom:20px}
+
+.popup-overlay{position:fixed;inset:0;background:rgba(9,9,15,.6);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px)}
+.popup-overlay.show{opacity:1;pointer-events:auto}
+.popup-box{background:#fff;border-radius:16px;width:90%;max-width:440px;padding:32px 28px;text-align:center;position:relative;transform:translateY(20px);transition:transform .3s;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.popup-overlay.show .popup-box{transform:translateY(0)}
+.popup-close{position:absolute;top:16px;right:16px;background:var(--gray2);border:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:18px;transition:.2s}
+.popup-close:hover{background:#e5e7eb;color:var(--text)}
+.popup-badge{display:inline-block;background:rgba(220,38,38,.1);color:var(--red);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:16px}
+.popup-box h3{font-size:24px;font-weight:900;letter-spacing:-.02em;margin-bottom:12px;line-height:1.2}
+.popup-box p{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.popup-box .btn-green{width:100%;justify-content:center}
+
+/* ─── DEV TOOLBAR ─────────────────────────────────── */
+#devBar{position:fixed;top:0;left:0;right:0;z-index:9999;background:#141414;border-bottom:2px solid var(--dev);padding:7px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:52px}
+#devBar .dt{font-size:10px;font-weight:800;color:var(--dev);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;padding-right:10px;border-right:1px solid #333}
+#devBar label{font-size:11px;color:#9ca3af;display:flex;align-items:center;gap:5px;white-space:nowrap}
+#devBar select,#devBar input[type=number]{height:24px;font-size:11px;padding:2px 6px;border:1px solid #333;border-radius:4px;background:#222;color:#e5e7eb;outline:none}
+#devBar input[type=number]{width:64px}
+.dev-sep{width:1px;height:18px;background:#333;flex-shrink:0}
+.dev-pill{position:relative;width:36px;height:18px;background:#333;border-radius:9px;cursor:pointer;transition:background .2s;flex-shrink:0}
+.dev-pill.on{background:#16a34a}
+.dev-pill::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s}
+.dev-pill.on::after{left:20px}
+.dev-status{font-size:11px;font-weight:700;min-width:28px}
+.dev-btn{font-size:11px;padding:3px 10px;border:1px solid #333;border-radius:4px;background:transparent;color:#9ca3af;cursor:pointer;white-space:nowrap;text-decoration:none;line-height:1.6}
+.dev-btn:hover{background:#222;color:#e5e7eb}
+.dev-btn.primary{background:var(--dev);border-color:var(--dev);color:#fff;font-weight:700}
+.dev-badge-toggle{font-size:11px;color:#9ca3af;display:flex;align-items:center;gap:5px}
+
+/* ─── SECTION LABELS ──────────────────────────────── */
+.slabel{position:absolute;top:10px;left:10px;z-index:50;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;pointer-events:none;display:none;line-height:1.5;white-space:nowrap}
+.slabel.new{background:#16a34a;color:#fff}
+.slabel.upd{background:#2563eb;color:#fff}
+.slabel.keep{background:#6b7280;color:#fff}
+body.labels .slabel{display:block}
+section,header,footer,.trust-strip,.stats-band,.sticky-bar-wrap{position:relative}
+
+/* ─── STICKY OFFER BAR ────────────────────────────── */
+.sticky-bar-wrap{position:sticky;top:52px;z-index:900}
+.sticky-bar{background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;padding:9px 20px;font-size:13px;font-weight:500;transition:all .3s}
+.sticky-bar.off{display:none}
+.sticky-bar strong{font-weight:800}
+.sticky-bar .sb-cta{background:rgba(255,255,255,.2);color:#fff;text-decoration:none;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.35);transition:.2s;white-space:nowrap}
+.sticky-bar .sb-cta:hover{background:rgba(255,255,255,.3)}
+.sticky-bar .sb-close{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.65);font-size:20px;cursor:pointer;line-height:1;padding:0 4px}
+
+/* ─── HEADER ──────────────────────────────────────── */
+header{background:var(--dark);position:sticky;top:52px;z-index:800}
+header.sticky-shifted{top:calc(52px + 40px)}
+nav{display:flex;align-items:center;height:64px;padding:0 60px;gap:28px}
+.logo{font-size:24px;font-weight:900;color:#fff;letter-spacing:-.03em}
+.logo em{color:var(--red);font-style:normal}
+.nav-links{display:flex;gap:22px;list-style:none;flex:1}
+.nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:13px;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-wa{display:inline-flex;align-items:center;gap:7px;background:var(--wa);color:#fff;text-decoration:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;transition:.2s;white-space:nowrap;flex-shrink:0}
+.nav-wa:hover{background:var(--wa2)}
+
+/* ─── HERO ────────────────────────────────────────── */
+.hero{background:var(--dark);padding:80px 60px;display:grid;grid-template-columns:1fr 280px;gap:60px;align-items:center;min-height:500px}
+.hero h1{font-size:52px;font-weight:900;color:#fff;line-height:1.08;letter-spacing:-.03em;margin-bottom:20px}
+.hero h1 em{color:var(--red);font-style:normal}
+.offer-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.35);color:#fca5a5;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;margin-bottom:20px;letter-spacing:.02em;transition:.3s}
+.offer-pill.off{opacity:0;pointer-events:none;height:0;margin:0;padding:0;border:none;overflow:hidden}
+.hero p{font-size:15px;color:rgba(255,255,255,.6);max-width:500px;margin-bottom:28px;line-height:1.7}
+.hero-btns{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap}
+.btn-green{display:inline-flex;align-items:center;gap:7px;background:var(--wa);color:#fff;text-decoration:none;padding:13px 26px;border-radius:8px;font-size:15px;font-weight:800;transition:.2s;border:none;cursor:pointer}
+.btn-green:hover{background:var(--wa2);transform:translateY(-1px)}
+.btn-outline{display:inline-flex;align-items:center;gap:7px;background:transparent;color:#fff;text-decoration:none;padding:13px 26px;border-radius:8px;font-size:15px;font-weight:600;border:1px solid rgba(255,255,255,.25);transition:.2s}
+.btn-outline:hover{background:rgba(255,255,255,.08)}
+.hero-stats{display:flex;gap:28px;flex-wrap:wrap}
+.hstat strong{display:block;font-size:24px;font-weight:900;color:#fff;line-height:1.1}
+.hstat span{font-size:12px;color:rgba(255,255,255,.5)}
+.hero-graphic{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50%;width:260px;height:260px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:12px;text-align:center;line-height:1.6;flex-shrink:0}
+
+/* ─── TRUST STRIP ─────────────────────────────────── */
+.trust-strip{background:#fff;padding:28px 60px;border-bottom:1px solid var(--border)}
+.trust-strip .ts-label{text-align:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:18px}
+.trust-logos{display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap}
+.trust-logos span{font-size:17px;font-weight:800;color:#9ca3af;letter-spacing:-.02em}
+
+/* ─── SECTIONS BASE ───────────────────────────────── */
+section{padding:72px 60px;overflow:hidden}
+.stag{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:10px}
+h2.sh{font-size:38px;font-weight:900;color:var(--text);letter-spacing:-.02em;margin-bottom:12px}
+.ssub{font-size:15px;color:var(--muted);max-width:560px;margin-bottom:44px;line-height:1.7}
+.tc{text-align:center}.tc .ssub{margin:0 auto 44px}
+
+/* ─── PATHWAY ─────────────────────────────────────── */
+.sec-pathway{background:var(--gray)}
+.pathway-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.pcard{background:#fff;border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center}
+.pnum{width:52px;height:52px;border-radius:50%;background:var(--red);color:#fff;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.pcard h3{font-size:19px;font-weight:800;margin-bottom:10px}
+.pcard p{color:var(--muted);font-size:14px}
+
+/* ─── HOW OFFER WORKS ─────────────────────────────── */
+.sec-how{background:#fff}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px}
+.hcard{border:1px solid var(--border);border-radius:12px;padding:28px 22px}
+.hnum{width:32px;height:32px;border-radius:50%;background:rgba(220,38,38,.1);border:2px solid rgba(220,38,38,.3);color:var(--red);font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.hcard h4{font-size:16px;font-weight:800;margin-bottom:8px}
+.hcard p{color:var(--muted);font-size:13px;line-height:1.6}
+.how-note{background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:14px 20px;font-size:13px;color:var(--muted);text-align:center}
+.how-note strong{color:var(--text)}
+
+/* ─── GALLERY ─────────────────────────────────────── */
+.sec-gallery{background:#fff}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:190px 190px;gap:10px;margin-bottom:28px}
+.gitem{background:var(--gray2);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);font-weight:500}
+.gitem:first-child{grid-row:1/3;background:#dbeafe;color:#1e40af;font-size:15px;font-weight:700}
+.gitem:nth-child(2){background:#d1fae5;color:#065f46}
+.gitem:nth-child(3){background:#fce7f3;color:#9d174d}
+.gitem:nth-child(4){background:#fffbeb;color:#92400e}
+.gitem:nth-child(5){background:#f3e8ff;color:#6b21a8}
+.gallery-wa{text-align:center;margin-top:8px}
+.gallery-wa a{color:var(--red);font-weight:700;text-decoration:none;font-size:14px}
+
+/* ─── STATS BAND ──────────────────────────────────── */
+.stats-band{background:var(--navy);padding:52px 60px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:860px;margin:0 auto;text-align:center}
+.snum{font-size:44px;font-weight:900;color:#fff;line-height:1;margin-bottom:8px}
+.slbl{font-size:13px;color:rgba(255,255,255,.55)}
+
+/* ─── COURSES ─────────────────────────────────────── */
+.sec-courses{background:var(--gray)}
+.ch{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px}
+.ch a{color:var(--red);font-size:13px;font-weight:700;text-decoration:none}
+.courses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.ccard{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.ccard:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.09)}
+.cimg{height:160px;display:flex;align-items:center;justify-content:center;position:relative;font-size:48px}
+.cimg.design{background:linear-gradient(135deg,#fce7f3,#fdf2f8)}
+.cimg.prog{background:linear-gradient(135deg,#ecfdf5,#d1fae5)}
+.cimg.mktg{background:linear-gradient(135deg,#fffbeb,#fef3c7)}
+.cimg.acct{background:linear-gradient(135deg,#fff1f2,#ffe4e6)}
+.cimg.offc{background:linear-gradient(135deg,#f0f9ff,#e0f2fe)}
+.cbadge{position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;letter-spacing:.02em}
+.cbody{padding:18px;flex:1;display:flex;flex-direction:column}
+.ccat{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:5px}
+.cname{font-size:17px;font-weight:800;margin-bottom:7px}
+.cdesc{font-size:13px;color:var(--muted);margin-bottom:14px;flex:1;line-height:1.55}
+.pblock{margin-bottom:14px}
+.p-base{font-size:13px;color:var(--muted);text-decoration:line-through}
+.p-final{font-size:24px;font-weight:900;color:var(--text);line-height:1.1}
+.p-only{font-size:24px;font-weight:900;color:var(--text);line-height:1.1}
+.p-save{display:inline-block;font-size:11px;font-weight:700;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;padding:2px 8px;border-radius:4px;margin-top:5px}
+.btn-wa-c{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--wa);color:#fff;padding:11px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:800;transition:.2s}
+.btn-wa-c:hover{background:var(--wa2)}
+
+/* ─── WHY TRUST ───────────────────────────────────── */
+.sec-trust{background:#fff}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:36px}
+.tcard{border:1px solid var(--border);border-radius:14px;padding:28px}
+.ticon{font-size:34px;margin-bottom:16px}
+.tcard h4{font-size:17px;font-weight:800;margin-bottom:10px}
+.tcard p{color:var(--muted);font-size:14px;line-height:1.6}
+
+/* ─── TESTIMONIALS ────────────────────────────────── */
+.sec-testi{background:var(--gray)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+.tcard2{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px}
+.stars{color:#f59e0b;font-size:15px;margin-bottom:12px}
+.ttext{font-size:14px;color:#374151;font-style:italic;line-height:1.7;margin-bottom:16px}
+.tauthor{display:flex;align-items:center;gap:12px}
+.tavatar{width:40px;height:40px;border-radius:50%;background:var(--gray2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--muted);flex-shrink:0}
+.tname{font-size:14px;font-weight:800}
+.tcourse{font-size:12px;color:var(--muted)}
+
+/* ─── NEWS ────────────────────────────────────────── */
+.sec-news{background:#fff}
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+.ncard{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.nthumb{height:120px;background:var(--gray2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border-bottom:1px solid var(--border)}
+.nbody{padding:18px}
+.ndate{font-size:11px;color:var(--muted);margin-bottom:6px}
+.ntitle{font-size:15px;font-weight:800;margin-bottom:7px;line-height:1.4}
+.nexcerpt{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ─── SECTION CTA BLOCK ───────────────────────────── */
+.sec-cta-inline{text-align:center;margin-top:36px;padding:20px 24px;background:var(--gray);border:1px dashed #d1d5db;border-radius:10px}
+.sec-cta-inline p{font-size:14px;color:var(--muted);margin-bottom:12px}
+.btn-wa-outline{display:inline-flex;align-items:center;gap:7px;color:var(--wa2);border:2px solid var(--wa);padding:10px 24px;border-radius:8px;font-size:14px;font-weight:800;text-decoration:none;transition:.2s}
+.btn-wa-outline:hover{background:var(--wa);color:#fff}
+
+/* ─── FINAL CTA ───────────────────────────────────── */
+.sec-final{background:var(--dark2);padding:80px 60px;text-align:center;position:relative;overflow:hidden}
+.sec-final::before{content:'';position:absolute;top:-60%;left:50%;transform:translateX(-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(220,38,38,.06) 0%,transparent 70%);pointer-events:none}
+.sec-final h2{font-size:42px;font-weight:900;color:#fff;letter-spacing:-.03em;margin-bottom:16px}
+.sec-final p{font-size:16px;color:rgba(255,255,255,.55);max-width:460px;margin:0 auto 28px;line-height:1.7}
+.final-bullets{display:flex;gap:24px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.final-bullets span{font-size:13px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:5px}
+.final-bullets span::before{content:'✓';color:var(--wa)}
+
+/* ─── FOOTER ──────────────────────────────────────── */
+footer{background:var(--dark);padding:52px 60px 28px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.fbrand p{font-size:13px;color:rgba(255,255,255,.38);margin-top:12px;max-width:260px;line-height:1.6}
+.fcol h5{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:14px}
+.fcol ul{list-style:none}
+.fcol li{margin-bottom:9px}
+.fcol a{color:rgba(255,255,255,.55);text-decoration:none;font-size:14px;transition:.2s}
+.fcol a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:22px;display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.3)}
+
+/* ─── FLOATING WA ─────────────────────────────────── */
+.float-wa{position:fixed;bottom:28px;right:28px;z-index:990;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.float-wa-tip{background:#fff;border:1px solid var(--border);color:var(--text);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;box-shadow:0 4px 16px rgba(0,0,0,.1);white-space:nowrap}
+.float-wa-btn{width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:.2s}
+.float-wa-btn:hover{transform:scale(1.1)}
+
+/* ─── GOVT SECTION ────────────────────────────────── */
+.sec-govt{background:var(--gray);padding:52px 60px}
+.govt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:32px}
+.gcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center}
+.gcard .gph{width:70px;height:70px;background:var(--gray2);border-radius:8px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);border:1px solid var(--border)}
+.gcard p{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body class="labels">
+
+<!-- ══ DEV TOOLBAR ══════════════════════════════════════════════════ -->
+<div id="devBar">
+  <span class="dt">🔧 Nipro — Homepage Prototype</span>
+
+  <div style="display:flex;align-items:center;gap:6px">
+    <span style="font-size:11px;color:#9ca3af">Discount</span>
+    <div class="dev-pill on" id="dToggle" onclick="toggleDiscount()"></div>
+    <span class="dev-status" id="dStatus" style="color:#16a34a">ON</span>
+  </div>
+  <div class="dev-sep"></div>
+
+  <label>Type:
+    <select id="dType" onchange="applyDev()">
+      <option value="percentage">% Percentage</option>
+      <option value="flat">₹ Flat Off</option>
+      <option value="fixed_price">₹ Fixed Price</option>
+    </select>
+  </label>
+  <label>Value: <input type="number" id="dValue" value="20" min="1" max="100" onchange="applyDev()"></label>
+  <label>Floor ₹: <input type="number" id="dFloor" value="0" min="0" onchange="applyDev()"></label>
+  <div class="dev-sep"></div>
+
+  <div class="dev-badge-toggle">
+    <span>Section Labels</span>
+    <div class="dev-pill on" id="lToggle" onclick="toggleLabels()"></div>
+  </div>
+  <div class="dev-sep"></div>
+
+  <span style="font-size:10px;color:#4b5563;max-width:160px;line-height:1.4">↕ Changes sync live with admin panel</span>
+  <a href="nipro-admin.html" target="_blank" class="dev-btn primary">Open Admin Panel →</a>
+</div>
+
+<!-- ══ 01 — STICKY OFFER BAR ═══════════════════════════════════════ -->
+<div class="sticky-bar-wrap">
+  <div class="sticky-bar off" id="stickyBar">
+    <span class="slabel new">01 · Sticky Bar [NEW] · Conditional: shows when active discount exists</span>
+    <span id="sbText">🎉 <strong>Special Enrollment Offer Available</strong> — Limited time only. Chat to claim.</span>
+    <a href="#" class="sb-cta" id="sbCta">Chat on WhatsApp →</a>
+    <button class="sb-close" onclick="document.getElementById('stickyBar').classList.add('off')">×</button>
+  </div>
+</div>
+
+<!-- ══ 02 — HEADER / NAV ════════════════════════════════════════════ -->
+<header id="mainHeader">
+  <span class="slabel upd">02 · Header [UPDATE] · Change primary CTA: "Enroll Now" → "Get Offer on WhatsApp"</span>
+  <nav>
+    <div class="logo">Nipro<em>.</em></div>
+    <ul class="nav-links">
+      <li><a href="#">Courses</a></li>
+      <li><a href="#">News</a></li>
+      <li><a href="#">Verify Cert</a></li>
+      <li><a href="#">FAQ</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <a href="#" class="nav-wa">💬 Get Offer on WhatsApp</a>
+  </nav>
+</header>
+
+<!-- ══ 03 — HERO ════════════════════════════════════════════════════ -->
+<section class="hero" id="heroSec">
+  <span class="slabel upd">03 · Hero [UPDATE] · Add offer badge below headline + update primary CTA text</span>
+  <div class="hero-content">
+    <h1>Learn the skills<br>that actually<br>get you <em>hired.</em></h1>
+    <div class="offer-pill off" id="heroBadge">🎉 Special Enrollment Offer Available</div>
+    <p>Practical computer training in Tally, AutoCAD, ERP, and more — with real certifications that employers value across India.</p>
+    <div class="hero-btns">
+      <a href="#" class="btn-green">💬 Get Offer on WhatsApp</a>
+      <a href="#courses" class="btn-outline">Browse Courses</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><strong>20,000+</strong><span>Students</span></div>
+      <div class="hstat"><strong>10+</strong><span>Expert Mentors</span></div>
+      <div class="hstat"><strong>15 yrs</strong><span>Excellence</span></div>
+    </div>
+  </div>
+  <div class="hero-graphic">[NIPRO LOGO<br>or<br>ILLUSTRATION]</div>
+</section>
+
+<!-- ══ 04 — TRUST STRIP ════════════════════════════════════════════ -->
+<div class="trust-strip">
+  <span class="slabel keep">04 · Trust Strip [KEEP] · Graduates hired by top companies</span>
+  <div class="ts-label">Our graduates are hired by top companies</div>
+  <div class="trust-logos">
+    <span>TCS</span>
+    <span>Wipro</span>
+    <span>Infosys</span>
+    <span>HDFC Bank</span>
+    <span>+ More</span>
+  </div>
+</div>
+
+<!-- ══ 05 — 3-STEP PATHWAY ═════════════════════════════════════════ -->
+<section class="sec-pathway">
+  <span class="slabel keep">05 · 3-Step Pathway [KEEP] · Minor copy update: step 2 should reference WhatsApp</span>
+  <div class="tc">
+    <div class="stag">Your Journey to Success</div>
+    <h2 class="sh">A 3-Step Proven Learning Pathway</h2>
+    <p class="ssub">See how the learning journey works — then contact us on WhatsApp for the current batch offer.</p>
+  </div>
+  <div class="pathway-grid">
+    <div class="pcard">
+      <div class="pnum">1</div>
+      <h3>Choose Your Course</h3>
+      <p>Browse our courses and find the one that matches your career goals. Ask on WhatsApp if you're not sure which to pick.</p>
+    </div>
+    <div class="pcard">
+      <div class="pnum">2</div>
+      <h3>Talk to Us on WhatsApp</h3>
+      <p>Chat with our counselor on WhatsApp. We'll confirm the current batch, check your offer, and walk you through admission.</p>
+    </div>
+    <div class="pcard">
+      <div class="pnum">3</div>
+      <h3>Join Batch & Start Learning</h3>
+      <p>Join your batch, get hands-on training, earn a govt. recognised certificate, and land your next opportunity.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 06 — HOW THIS OFFER WORKS ═══════════════════════════════════ -->
+<section class="sec-how">
+  <span class="slabel new">06 · How Offer Works [NEW ⭐] · MISSING from current site — add after step pathway — critical for conversion</span>
+  <div class="tc">
+    <div class="stag">Current Enrollment Offer</div>
+    <h2 class="sh">How the Current Offer Works</h2>
+    <p class="ssub">No coupon codes. No online checkout. Here's the exact process to claim your discount in 3 steps.</p>
+  </div>
+  <div class="how-grid">
+    <div class="hcard">
+      <div class="hnum">1</div>
+      <h4>Pick Your Course Below</h4>
+      <p>Browse the courses section. Each card shows the current offer price and the amount you save. Pick the course that fits your goal.</p>
+    </div>
+    <div class="hcard">
+      <div class="hnum">2</div>
+      <h4>Tap "Get Offer on WhatsApp"</h4>
+      <p>Click the green WhatsApp button on any course card. A pre-filled message opens automatically — just press send. No typing needed.</p>
+    </div>
+    <div class="hcard">
+      <div class="hnum">3</div>
+      <h4>We Confirm the Price & Next Steps</h4>
+      <p>Our team confirms the current discount, the next batch start date, and the simple steps to join. That's the whole process.</p>
+    </div>
+  </div>
+  <div class="how-note">
+    <strong>No coupon code needed.</strong> No online payment required on this website.
+    <strong>Your offer is confirmed directly on WhatsApp</strong> by our team — always manual, always personal.
+  </div>
+</section>
+
+<!-- ══ 07 — LEARNING ENVIRONMENT ═══════════════════════════════════ -->
+<section class="sec-gallery">
+  <span class="slabel keep">07 · Gallery [KEEP] · Add small WhatsApp CTA below gallery images</span>
+  <div class="tc">
+    <div class="stag">World-Class Infrastructure</div>
+    <h2 class="sh">Learn in a Professional Environment</h2>
+    <p class="ssub">Our labs are equipped with modern systems, high-speed internet, and a distraction-free environment.</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gitem">[Lab / Campus<br>Main Image]</div>
+    <div class="gitem">[Students<br>in Class]</div>
+    <div class="gitem">[Lab<br>Setup]</div>
+    <div class="gitem">[Practical<br>Project Work]</div>
+    <div class="gitem">[Certificate<br>Award Ceremony]</div>
+  </div>
+  <div class="gallery-wa">
+    <a href="#">💬 See where students learn — Ask about today's offer on WhatsApp →</a>
+  </div>
+</section>
+
+<!-- ══ 08 — STATS BAND ══════════════════════════════════════════════ -->
+<div class="stats-band" style="position:relative">
+  <span class="slabel keep">08 · Stats Band [KEEP]</span>
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="snum">20,000+</div>
+      <div class="slbl">Students Enrolled</div>
+    </div>
+    <div class="stat-item">
+      <div class="snum">10+</div>
+      <div class="slbl">Expert Mentors</div>
+    </div>
+    <div class="stat-item">
+      <div class="snum">15+</div>
+      <div class="slbl">Years of Excellence</div>
+    </div>
+    <div class="stat-item">
+      <div class="snum">2000+</div>
+      <div class="slbl">Success Stories</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 09 — COURSES ═════════════════════════════════════════════════ -->
+<section class="sec-courses" id="courses">
+  <span class="slabel upd">09 · Courses [UPDATE ⭐] · New card design with dynamic discount pricing — synced with admin panel in real time</span>
+  <div class="ch">
+    <div>
+      <div class="stag">Explore Our Courses</div>
+      <h2 class="sh" style="margin-bottom:0">Our Top Courses</h2>
+    </div>
+    <a href="#">Browse All Courses →</a>
+  </div>
+  <div class="courses-grid" id="coursesGrid">
+    <!-- Injected by JS -->
+  </div>
+</section>
+
+<!-- ══ 10 — WHY TRUST NIPRO ════════════════════════════════════════ -->
+<section class="sec-trust">
+  <span class="slabel keep">10 · Why Trust Nipro [KEEP] · Add small WhatsApp CTA at bottom of section</span>
+  <div class="tc">
+    <div class="stag">Our Promise</div>
+    <h2 class="sh">Why 20,000+ Students Trust Nipro</h2>
+    <p class="ssub">We don't just teach — we prepare you for the real world. Here's what makes us different.</p>
+  </div>
+  <div class="tgrid">
+    <div class="tcard">
+      <div class="ticon">💻</div>
+      <h4>Your Own Computer, Every Class</h4>
+      <p>Every student gets dedicated computer access. No sharing, no waiting. Hands-on from day one. This is how practical skills are actually built.</p>
+    </div>
+    <div class="tcard">
+      <div class="ticon">🏛️</div>
+      <h4>Govt. Recognised Certification</h4>
+      <p>Our certifications are recognised and valid for jobs, promotions, and higher education applications. Not just a piece of paper.</p>
+    </div>
+    <div class="tcard">
+      <div class="ticon">🗣️</div>
+      <h4>Learn in Your Language</h4>
+      <p>Classes taught in the language you're most comfortable in. No language barrier between you and the skills you need.</p>
+    </div>
+  </div>
+  <div class="sec-cta-inline">
+    <p>Need current offer details or batch information? Our team is on WhatsApp.</p>
+    <a href="#" class="btn-wa-outline">💬 WhatsApp Us Now →</a>
+  </div>
+</section>
+
+<!-- ══ 10.5 — FACULTY ══════════════════════════════════════════════ -->
+<section class="sec-faculty">
+  <span class="slabel new">10.5 · Faculty [NEW] · Founder profile and faculty cards</span>
+  <div class="tc">
+    <div class="stag">Expert Mentors</div>
+    <h2 class="sh">Learn From The Best</h2>
+    <p class="ssub">Our instructors are industry professionals who bring real-world experience directly to the classroom.</p>
+  </div>
+  <div class="fac-grid">
+    <div class="fac-card">
+      <div class="fac-img">[Founder Photo]</div>
+      <div class="fac-name">Amit Sharma</div>
+      <div class="fac-role">Founder & Lead Mentor</div>
+      <div class="fac-desc">15+ years experience in IT education. Passionate about bridging the gap between academic learning and industry requirements.</div>
+    </div>
+    <div class="fac-card">
+      <div class="fac-img">[Faculty Photo]</div>
+      <div class="fac-name">Priya Patel</div>
+      <div class="fac-role">Design & Animation Head</div>
+      <div class="fac-desc">Former Senior Designer at top ad agencies. Specializes in practical Photoshop, Illustrator, and UI/UX design.</div>
+    </div>
+    <div class="fac-card">
+      <div class="fac-img">[Faculty Photo]</div>
+      <div class="fac-name">Rahul Verma</div>
+      <div class="fac-role">Programming & Dev</div>
+      <div class="fac-desc">Full-stack developer with 8+ years of corporate experience. Makes complex C++ and logic structures easy for beginners.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 11 — GOVT RECOGNISED ════════════════════════════════════════ -->
+<section class="sec-govt">
+  <span class="slabel keep">11 · Govt Recognition [KEEP] · Keep logos and stamps</span>
+  <div class="tc">
+    <div class="stag">Government Certified</div>
+    <h2 class="sh">Govt. Authorised & Recognised</h2>
+    <p class="ssub">Our institute is officially approved and recognised by the government, assuring you complete credibility.</p>
+  </div>
+  <div class="govt-grid">
+    <div class="gcard"><div class="gph">[Logo]</div><p>Govt. of UP Registration</p></div>
+    <div class="gcard"><div class="gph">[Logo]</div><p>Govt. of Telangana Registration</p></div>
+    <div class="gcard"><div class="gph">[Logo]</div><p>ISO 9001:2015 Certified</p></div>
+    <div class="gcard"><div class="gph">[Logo]</div><p>MSME Registered</p></div>
+  </div>
+</section>
+
+<!-- ══ 12 — TESTIMONIALS ════════════════════════════════════════════ -->
+<section class="sec-testi">
+  <span class="slabel keep">12 · Testimonials [KEEP] · Add WhatsApp CTA after cards</span>
+  <div class="tc">
+    <div class="stag">Real Testimonials</div>
+    <h2 class="sh">Don't Just Take Our Word for It</h2>
+    <p class="ssub">Our graduates are working in leading companies across India. Here are their stories.</p>
+  </div>
+  <div class="testi-grid">
+    <div class="tcard2">
+      <div class="stars">★★★★★</div>
+      <p class="ttext">"Nipro completely transformed my career. The hands-on training and my own system every class gave me the confidence to crack my first technical interview at TCS."</p>
+      <div class="tauthor">
+        <div class="tavatar">RK</div>
+        <div><div class="tname">Rahul Kumar</div><div class="tcourse">AutoCAD · TCS · Verified Student</div></div>
+      </div>
+    </div>
+    <div class="tcard2">
+      <div class="stars">★★★★★</div>
+      <p class="ttext">"The government-recognised certificate helped me get a promotion in my current job. The instructors are extremely patient and knowledgeable."</p>
+      <div class="tauthor">
+        <div class="tavatar">SS</div>
+        <div><div class="tname">Sneha Sharma</div><div class="tcourse">Tally ERP · HDFC Bank · Verified Student</div></div>
+      </div>
+    </div>
+    <div class="tcard2">
+      <div class="stars">★★★★★</div>
+      <p class="ttext">"Learning in my native language made programming easy to grasp. The projects we built were exactly what interviewers wanted to see."</p>
+      <div class="tauthor">
+        <div class="tavatar">MA</div>
+        <div><div class="tname">Mohammed Ali</div><div class="tcourse">C & C++ · Wipro · Verified Student</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sec-cta-inline">
+    <p>Want the same result? Ask about the current enrollment offer on WhatsApp.</p>
+    <a href="#" class="btn-wa-outline">💬 Get the Current Offer →</a>
+  </div>
+</section>
+
+<!-- ══ 13 — LATEST NEWS ════════════════════════════════════════════ -->
+<section class="sec-news">
+  <span class="slabel keep">13 · Latest News [KEEP]</span>
+  <div class="ch">
+    <div>
+      <div class="stag">Latest</div>
+      <h2 class="sh" style="margin-bottom:0">News & Success Stories</h2>
+    </div>
+    <a href="#">View All →</a>
+  </div>
+  <div class="news-grid">
+    <div class="ncard"><div class="nthumb">[Blog Image]</div><div class="nbody"><div class="ndate">May 28, 2026</div><div class="ntitle">New AI & Machine Learning Batch Starting July 2026</div><div class="nexcerpt">Enroll in our new AI course designed for complete beginners. Batch seats filling fast.</div></div></div>
+    <div class="ncard"><div class="nthumb">[Blog Image]</div><div class="nbody"><div class="ndate">May 15, 2026</div><div class="ntitle">15 Nipro Students Placed at Infosys This Month</div><div class="nexcerpt">Our latest batch placement record — 15 students joined Infosys after completing their certification.</div></div></div>
+    <div class="ncard"><div class="nthumb">[Blog Image]</div><div class="nbody"><div class="ndate">April 30, 2026</div><div class="ntitle">Tally ERP 9 vs TallyPrime — Which Should You Learn?</div><div class="nexcerpt">A quick guide to help you decide which Tally version is right for your career in 2026.</div></div></div>
+  </div>
+</section>
+
+<!-- ══ 13.5 — REMINDER BLOCK ═══════════════════════════════════════ -->
+<section class="sec-reminder off" id="reminderBlock">
+  <span class="slabel new">13.5 · Soft Reminder [NEW] · Conditional block based on active discount</span>
+  <h3 id="remTitle">Don't Miss Out on This Offer</h3>
+  <p id="remText">The current batch is filling up. Claim your discount before it expires.</p>
+  <a href="#" class="btn-green" id="remCta">💬 Claim Offer on WhatsApp</a>
+</section>
+
+<!-- ══ 14 — FINAL CTA ══════════════════════════════════════════════ -->
+<section class="sec-final">
+  <span class="slabel upd">14 · Final CTA [UPDATE] · Remove "Don't just take our word for it" generic copy — replace with offer-focused closer</span>
+  <h2>Still Comparing Courses?</h2>
+  <p>Talk to a counselor and get the current enrollment offer — no obligation, no online payment, no coupon codes required.</p>
+  <div class="final-bullets">
+    <span>No coupon code</span>
+    <span>No online checkout</span>
+    <span>Offer confirmed on WhatsApp</span>
+  </div>
+  <a href="#" class="btn-green" style="font-size:16px;padding:16px 36px;margin:0 auto">💬 WhatsApp Now — Get Today's Offer</a>
+</section>
+
+<!-- ══ NOTE: REMOVED SECTION ═══════════════════════════════════════ -->
+<section class="sec-community">
+  <span class="slabel new">15 · Community [NEW] · Replaced architectural section with WhatsApp Community</span>
+  <h2>Stay Updated with Nipro</h2>
+  <p>Join our WhatsApp community to get alerts about new courses, upcoming batch dates, and exclusive student offers before anyone else.</p>
+  <a href="#" class="btn-green" style="background:#fff;color:var(--navy)">💬 Join WhatsApp Community</a>
+</section>
+
+<!-- ══ 15 — FOOTER ════════════════════════════════════════════════ -->
+<footer>
+  <span class="slabel keep">15 · Footer [KEEP]</span>
+  <div class="footer-grid">
+    <div class="fbrand">
+      <div class="logo">Nipro<em>.</em></div>
+      <p>Practical computer education for real careers. Govt. recognised certifications. Hands-on training since 2010.</p>
+    </div>
+    <div class="fcol">
+      <h5>Quick Links</h5>
+      <ul>
+        <li><a href="#">All Courses</a></li>
+        <li><a href="#">Verify Certificate</a></li>
+        <li><a href="#">News & Blog</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="fcol">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="#">+91 XXXX XXXXXX</a></li>
+        <li><a href="#">WhatsApp Us</a></li>
+        <li><a href="#">info@nipro.com</a></li>
+        <li><a href="#">Visit Campus</a></li>
+      </ul>
+    </div>
+    <div class="fcol">
+      <h5>Recognition</h5>
+      <ul>
+        <li><a href="#">Govt. Registered</a></li>
+        <li><a href="#">ISO 9001:2015</a></li>
+        <li><a href="#">Affiliations</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Nipro Computer Education. All rights reserved.</span>
+    <span>For enrollment & current offers → WhatsApp us</span>
+  </div>
+</footer>
+
+<!-- ══ FLOATING WA BUTTON ══════════════════════════════════════════ -->
+<div class="float-wa">
+  <div class="float-wa-tip" id="waTip">💬 Ask About Current Offer</div>
+  <a href="#" class="float-wa-btn">💬</a>
+</div>
+
+<!-- ══ POPUP OVERLAY ═══════════════════════════════════════════════ -->
+<div class="popup-overlay" id="promoPopup">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closePopup()">×</button>
+    <div class="popup-badge" id="puBadge">Special Offer</div>
+    <h3 id="puTitle">Get Started Today</h3>
+    <p id="puText">Chat with us on WhatsApp to confirm the current enrollment offer and batch details.</p>
+    <a href="#" class="btn-green" id="puCta">💬 Chat on WhatsApp</a>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   NIPRO HOMEPAGE — DISCOUNT ENGINE
+   Syncs with admin panel via localStorage
+   ═══════════════════════════════════════════════════ */
+
+const COURSES = [
+  {id:'photoshop',   name:'Adobe Photoshop',    cat:'Design',      emoji:'🎨', cls:'design', base:4999, desc:'Professional image editing for print, digital, and social media.'},
+  {id:'autocad',     name:'AutoCAD 2D & 3D',    cat:'Design',      emoji:'📐', cls:'design', base:6999, desc:'Architectural and mechanical drafting with industry-standard AutoCAD.'},
+  {id:'cpp',         name:'C & C++ Programming', cat:'Programming', emoji:'💻', cls:'prog',   base:3999, desc:'Build strong programming foundations with C and C++ from scratch.'},
+  {id:'digi-mktg',   name:'Digital Marketing',  cat:'Marketing',   emoji:'📱', cls:'mktg',   base:5999, desc:'SEO, social media ads, and performance marketing for the real world.'},
+  {id:'tally',       name:'Tally ERP 9',         cat:'Accounting',  emoji:'📊', cls:'acct',   base:4499, desc:'Complete accounting, GST filing, and inventory management with Tally.'},
+  {id:'ms-office',   name:'MS Office Suite',     cat:'Office',      emoji:'📄', cls:'offc',   base:2999, desc:'Excel, Word, PowerPoint — the complete professional office toolkit.'},
+];
+
+const DEFAULT_DISCOUNTS = [{
+  id:'d1', title:'Summer Enrollment Offer 2026', discount_type:'percentage',
+  discount_value:20, min_floor_price:0, applies_to:'all', course_ids:[],
+  starts_at:'2026-01-01T00:00:00', ends_at:'2099-12-31T23:59:59', is_active:true
+}];
+
+let discountOn = true;
+let discounts = loadDiscounts();
+
+function loadDiscounts(){
+  try{const s=localStorage.getItem('nipro_discounts');return s?JSON.parse(s):DEFAULT_DISCOUNTS;}
+  catch{return DEFAULT_DISCOUNTS;}
+}
+
+function calcSaving(base, d){
+  switch(d.discount_type){
+    case'percentage': return base*(d.discount_value/100);
+    case'flat':       return d.discount_value;
+    case'fixed_price':return base-d.discount_value;
+    default:          return 0;
+  }
+}
+
+function getPricing(cid, base){
+  if(!discountOn) return {base,final:base,saving:0,pct:0,has:false};
+  const now=new Date();
+  const ok=discounts.filter(d=>{
+    if(!d.is_active) return false;
+    if(new Date(d.starts_at)>now||new Date(d.ends_at)<now) return false;
+    if(d.applies_to==='selected'&&!d.course_ids.includes(cid)) return false;
+    return true;
+  }).sort((a,b)=>calcSaving(base,b)-calcSaving(base,a));
+  if(!ok.length) return {base,final:base,saving:0,pct:0,has:false};
+  const best=ok[0];
+  const sav=calcSaving(base,best);
+  const raw=base-sav;
+  const fin=Math.round(Math.max(raw,best.min_floor_price||0,0));
+  if(fin>=base) return {base,final:base,saving:0,pct:0,has:false};
+  return{base,final:fin,saving:base-fin,pct:Math.round(((base-fin)/base)*100),has:true,title:best.title};
+}
+
+function anyActive(){
+  if(!discountOn) return false;
+  const now=new Date();
+  return discounts.some(d=>d.is_active&&new Date(d.starts_at)<=now&&new Date(d.ends_at)>=now);
+}
+
+function getActiveDiscount(){
+  const now=new Date();
+  return discounts.find(d=>d.is_active&&new Date(d.starts_at)<=now&&new Date(d.ends_at)>=now)||null;
+}
+
+function inr(n){return'₹'+Math.abs(n).toLocaleString('en-IN')}
+
+function renderCourses(){
+  document.getElementById('coursesGrid').innerHTML=COURSES.map(c=>{
+    const p=getPricing(c.id,c.base);
+    const waMsg=`Hi, I saw the ${c.name} on your website. Please share the current offer and admission details.`;
+    return`<div class="ccard">
+      <div class="cimg ${c.cls}">
+        <span>${c.emoji}</span>
+        ${p.has?`<div class="cbadge">${p.pct}% OFF</div>`:''}
+      </div>
+      <div class="cbody">
+        <div class="ccat">${c.cat}</div>
+        <div class="cname">${c.name}</div>
+        <div class="cdesc">${c.desc}</div>
+        <div class="pblock">
+          ${p.has
+            ?`<div class="p-base">${inr(p.base)}</div><div class="p-final">${inr(p.final)}</div><div class="p-save">Save ${inr(p.saving)} · ${p.pct}% off</div><div style="font-size:11px;color:var(--muted);margin-top:6px;padding:4px 8px;background:var(--gray2);border-radius:4px;display:inline-block">🏷️ Applied: ${p.title}</div>`
+            :`<div class="p-only">${inr(p.base)}</div>`
+          }
+        </div>
+        <a href="https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(waMsg)}" class="btn-wa-c">
+          💬 ${p.has?'Get Offer on WhatsApp':'Talk to Us on WhatsApp'}
+        </a>
+      </div>
+    </div>`}).join('');
+}
+
+function updatePage(){
+  const active=anyActive();
+  const ad=getActiveDiscount();
+
+  // Sticky bar
+  const bar=document.getElementById('stickyBar');
+  if(active&&ad){
+    bar.classList.remove('off');
+    document.getElementById('sbText').innerHTML=
+      `🎉 <strong>${ad.title}</strong> — Limited time only. Chat on WhatsApp to confirm your discount.`;
+    document.getElementById('sbCta').href=`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent('Hi, I want to check the current enrollment offer.')}`;
+  } else {
+    bar.classList.add('off');
+  }
+
+  // Reminder Block
+  const rem=document.getElementById('reminderBlock');
+  if(active&&ad){
+    rem.classList.remove('off');
+    document.getElementById('remTitle').textContent = `Don't Miss: ${ad.title}`;
+  } else {
+    rem.classList.add('off');
+  }
+
+  // Hero badge
+  const badge=document.getElementById('heroBadge');
+  badge.classList.toggle('off',!active);
+
+  // WA tooltip
+  document.getElementById('waTip').textContent=active?'💬 Ask About Current Offer':'💬 Chat With Us';
+
+  // Course cards
+  renderCourses();
+
+  // Header offset
+  const hdr=document.getElementById('mainHeader');
+  hdr.style.top=active?'calc(52px + 40px)':'52px';
+}
+
+/* ─── POPUP LOGIC ───────────────────────── */
+let popupShown = sessionStorage.getItem('nipro_popup_shown');
+function showPopup() {
+  if (popupShown || !anyActive()) return;
+  const ad = getActiveDiscount();
+  if(!ad) return;
+  document.getElementById('puTitle').textContent = ad.title;
+  document.getElementById('promoPopup').classList.add('show');
+  popupShown = true;
+  sessionStorage.setItem('nipro_popup_shown', 'true');
+}
+function closePopup() {
+  document.getElementById('promoPopup').classList.remove('show');
+}
+setTimeout(showPopup, 7000);
+document.addEventListener('mouseleave', (e) => {
+  if (e.clientY <= 0) showPopup();
+});
+
+/* ─── DEV TOOLBAR ───────────────────────── */
+function toggleDiscount(){
+  discountOn=!discountOn;
+  const pill=document.getElementById('dToggle');
+  const st=document.getElementById('dStatus');
+  pill.classList.toggle('on',discountOn);
+  st.textContent=discountOn?'ON':'OFF';
+  st.style.color=discountOn?'#16a34a':'#ef4444';
+  updatePage();
+}
+
+function applyDev(){
+  const type=document.getElementById('dType').value;
+  const val=parseFloat(document.getElementById('dValue').value)||0;
+  const floor=parseFloat(document.getElementById('dFloor').value)||0;
+  discounts=[{
+    id:'dev',title:'Dev Preview Discount',discount_type:type,
+    discount_value:val,min_floor_price:floor,applies_to:'all',course_ids:[],
+    starts_at:'2026-01-01T00:00:00',ends_at:'2099-12-31T23:59:59',is_active:true
+  }];
+  localStorage.setItem('nipro_discounts',JSON.stringify(discounts));
+  updatePage();
+}
+
+function toggleLabels(){
+  document.body.classList.toggle('labels');
+  document.getElementById('lToggle').classList.toggle('on',document.body.classList.contains('labels'));
+}
+
+/* ─── CROSS-FILE SYNC ───────────────────── */
+window.addEventListener('storage',e=>{
+  if(e.key==='nipro_discounts'){
+    discounts=e.newValue?JSON.parse(e.newValue):DEFAULT_DISCOUNTS;
+    updatePage();
+  }
+});
+
+/* ─── INIT ──────────────────────────────── */
+updatePage();
+</script>
+</body>
+</html>

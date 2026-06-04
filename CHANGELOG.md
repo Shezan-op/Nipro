@@ -1,5 +1,61 @@
 # Changelog
 
+## Emergency Proxy Rollback (2026-05-29)
+
+### Routing Fix
+- **Middleware Deprecation Fix**: Renamed `src/middleware.ts` to `src/proxy.ts` and updated the exported function to `export function proxy(request: NextRequest)` to resolve the Next.js 16 deprecation warning and fix the `404 Not Found` error on the `/admin/login` route.
+
+## Phase 21: The Enterprise Promo Engine & UI Overhaul (2026-06-03)
+
+### Architecture & Database
+- **Discount Rules Engine**: Upgraded the `discounts` table with new columns via SQL migration (`type`, `value`, `max_discount_cap`, `min_floor_price`, `eligible_course_ids`, `is_active`) to support complex enterprise-level pricing rules.
+- **Pure Calculator Function**: Created `src/lib/pricing.ts` with `calculateFinalPrice` to dynamically calculate safe prices without mutating the database's original price values. Enforces minimum floor prices and absolute caps safely.
+- **Faculty Database**: Added `faculty` table to track instructor profiles with images, roles, bios, and active status.
+
+### UI Upgrades
+- **CourseCard Refactor**: Removed raw math calculations from `CourseCard.tsx`. Replaced with `calculateFinalPrice`. Re-wired props to accept `discount` directly from parent `FeaturedCourses` and `CourseList` components.
+- **Admin Discount Dashboard**: Completely overhauled the discount creation form to support "Percentage", "Flat Amount Off", and "Fixed Price" discount types, along with optional inputs for Max Caps and Minimum Floors. Added a toggle for Active/Paused states, conflict detection warnings, and promo surfaces configuration.
+- **Admin Faculty Dashboard**: Added a new dashboard (`/admin/faculty`) to manage faculty profiles with image upload functionality.
+- **Homepage Promo Surfaces**: Implemented dynamic Promo Popup and Soft Reminder sections pulling data from active discounts.
+- **WhatsApp Integration**: Replaced the Naksha section with a dedicated "WhatsApp Community" section drawing contact numbers dynamically from `site_settings`.
+- **Hero & PromotionalBanner**: Synced components to pull data according to active top-bar and hero-applicable discount rules.
+
+## Phase 20: The Zero-Day Architecture Patch (2026-05-29)
+
+### Architecture & Database Fixes
+- **Course Description Data Loss Fix**: Ran database migration to add `description` text column to the `courses` table. Updated `data-service.ts` to include this field in both `createCourse` and `updateCourse` payloads, preventing silent data loss of the 500-character description field.
+- **Contact Form Persistence**: Created `contact_messages` table via migration. Refactored `submitContactForm` in `actions.ts` to actively insert validated form data into the database instead of dumping it to the server console.
+- **Blog Visibility Filter**: Moved the blog status filter (Draft vs Published) to the database level inside `getBlogPosts()` with an optional `publishedOnly` parameter. Removed the client-side filter in `news/page.tsx` so the `limit(10)` correctly returns 10 published posts instead of dropping out draft results post-fetch.
+- **Blog ID Collision Prevention**: Updated `createBlogAction` to generate primary keys using `crypto.randomUUID()` instead of `Date.now().toString()`.
+
+### UI & Security Fixes
+- **Dynamic Promo Banner Sync**: Updated the homepage `PromotionalBanner` to accept the `latestDiscount` object as a prop, dynamically rendering the exact percentage and title from the database rather than hardcoded text.
+- **File Upload Security Hardening**: Added strict validation inside `uploadFileAction` for file size (5MB limit) and MIME types (`image/jpeg`, `image/png`, `image/webp`, `application/pdf`).
+
+## Phase 19: Red Team Security Lockdown & UI Patch (2026-05-29)
+
+### Security Fixes
+- **Middleware DDoS Patch**: Renamed `src/proxy.ts` back to `src/middleware.ts` and restored the exported function name to `middleware`. The previous rename had silently disabled Next.js Edge middleware, leaving `/admin/login` and `/verify` unprotected against brute-force and rate-limit bypass attacks.
+- **Certificate Harvesting Fix**: Replaced the `.or(id.ilike, search_alias.ilike)` query in `getCertificateById` with a strict `.eq('id', id)` exact-match query. Certificates are now only accessible via the exact, case-sensitive ID — attackers can no longer enumerate certificates by guessing common first names or aliases.
+
+### Bug Fixes
+- **Certificate Preview Blank State**: The edit certificate form now always renders the preview section, with an `onError` fallback for broken image URLs and a "No preview available" placeholder when no `imageUrl` is set. Previously, the preview was conditionally hidden when `imageUrl` was falsy, giving no visual feedback.
+
+### Verification
+- **Discount 0% Value**: Confirmed the discount form already correctly allows `0` as a valid percentage — the validation uses explicit `!== undefined && !== null` checks (not truthy checks), and `parseInt('0')` returns `0` which passes all guards.
+- **Homepage Banner Default**: Confirmed the homepage promotional banner already defaults to hidden via `is_offer_active === true` strict equality check — the banner only appears when the admin explicitly enables it.
+
+## Phase 17: Critical Flow Stabilization & Smart UI (2026-05-27)
+
+### Bug Fixes
+- **PGRST204 Course Crash**: Removed all references to non-existent `long_description` / `longDescription` database column from course inserts and updates in `data-service.ts`.
+- **Strict Duplicate Certificate ID Handling**: Caught Postgres unique constraint violation error code `23505` inside `actions.ts` (`addCertificate`). Returned a clean, descriptive error message `"A Certificate with this ID already exists."` and updated `certificates/page.tsx` to display this in the toast.
+- **Image Sweep**: Verified `src/app/verify/page.tsx` and `src/app/admin/certificates/page.tsx` use standard HTML `<img>` elements to properly display Supabase storage images.
+
+### Enhancements
+- **Smart Course Categories (Autocomplete)**: Added `getUniqueCategories` to `data-service.ts` and `getUniqueCategoriesAction` server action to retrieve unique existing course categories. Integrated autocomplete suggestions in the admin Category input via a native HTML `<datalist>`.
+- **Promo Card Sync**: Refactored the homepage CTA promotional block to sync dynamically with settings (`is_offer_active` flag) and the `discounts` table. Displays the latest discount's title, description, and percentage dynamically instead of hardcoded values, and hides the block if no discounts exist or settings deactivate it.
+
 ## Phase 18: Certificate Delete Fix & Sync Verification (2026-05-21)
 
 ### Bug Fixes

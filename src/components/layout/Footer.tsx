@@ -77,13 +77,10 @@ export function Footer({ settings }: { settings?: SiteSettings }) {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-zinc-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] text-zinc-650 tracking-tight">
+        <div className="mt-12 border-t border-zinc-900 pt-6 flex justify-center sm:justify-start">
+          <p className="text-[11px] text-zinc-600 tracking-tight">
             &copy; {new Date().getFullYear()} {settings?.name || "Nipro Computer Education Institute"}. All rights reserved.
           </p>
-          <div className="flex gap-6">
-             <Link href="/admin/login" className="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors">Admin Login</Link>
-          </div>
         </div>
       </div>
     </footer>

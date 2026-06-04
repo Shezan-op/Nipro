@@ -112,7 +112,7 @@ export default function AdminCertificates() {
         });
         loadCertificates();
       } else {
-        toast.error('Failed to issue certificate');
+        toast.error(result.error || 'Failed to issue certificate');
       }
     } catch (error) {
       console.error(error);
@@ -402,18 +402,25 @@ export default function AdminCertificates() {
                   )}
                 </div>
               </div>
-              {editingCert.imageUrl && (
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Current Certificate Preview</label>
-                  <div className="w-full max-w-md aspect-[1.414/1] bg-gray-50 border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center p-2">
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Current Certificate Preview</label>
+                <div className="w-full max-w-md aspect-[1.414/1] bg-gray-50 border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center p-2">
+                  {editingCert.imageUrl ? (
                     <img 
                       src={editingCert.imageUrl} 
                       alt="Certificate Preview" 
                       className="w-full h-full object-contain"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        target.parentElement!.innerHTML = '<p class="text-sm text-slate-400 font-medium">Image failed to load — upload a new file above.</p>';
+                      }}
                     />
-                  </div>
+                  ) : (
+                    <p className="text-sm text-slate-400 font-medium">No preview available — upload a certificate file above.</p>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">

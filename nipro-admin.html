@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nipro Admin — Discount Management</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;color:#0f172a;display:flex;min-height:100vh;font-size:14px}
+
+:root{
+  --red:#dc2626; --red2:#b91c1c;
+  --dark:#0f172a; --dark2:#1e293b;
+  --wa:#25d366; --wa2:#128c7e;
+  --active:#16a34a; --scheduled:#2563eb; --paused:#64748b; --expired:#dc2626;
+  --border:#e2e8f0; --border2:#cbd5e1;
+  --muted:#64748b; --text:#0f172a;
+  --gray:#f8fafc; --gray2:#f1f5f9;
+}
+
+/* ─── SIDEBAR ─────────────────────────────────────── */
+.sidebar{width:240px;background:var(--dark);flex-shrink:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.sb-logo{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo .logo{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.03em}
+.sb-logo .logo em{color:var(--red);font-style:normal}
+.sb-logo .badge{display:inline-block;font-size:9px;background:rgba(220,38,38,.2);color:#fca5a5;padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:.08em;margin-top:4px;text-transform:uppercase}
+.sb-section{padding:20px 12px 4px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.sb-nav{list-style:none;padding:0 8px}
+.sb-nav li a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;color:rgba(255,255,255,.55);text-decoration:none;font-size:13px;font-weight:500;transition:.15s;margin-bottom:2px}
+.sb-nav li a:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.sb-nav li.active a{background:rgba(220,38,38,.15);color:#fff;font-weight:600}
+.sb-nav li.active a .sb-icon{color:var(--red)}
+.sb-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-count{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:10px}
+.sb-footer{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:rgba(255,255,255,.3)}
+.sb-footer a{color:rgba(255,255,255,.5);text-decoration:none}
+.sb-footer a:hover{color:#fff}
+
+/* ─── MAIN AREA ───────────────────────────────────── */
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* ─── TOPBAR ──────────────────────────────────────── */
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.breadcrumb a{color:var(--muted);text-decoration:none}
+.breadcrumb a:hover{color:var(--text)}
+.breadcrumb .sep{color:#cbd5e1}
+.breadcrumb .cur{font-weight:700;color:var(--text)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.sync-badge{font-size:11px;background:#f0fdf4;color:var(--active);border:1px solid #bbf7d0;padding:3px 10px;border-radius:20px;font-weight:700;display:flex;align-items:center;gap:5px}
+.sync-badge.synced::before{content:'●';font-size:8px}
+.topbar-user{width:32px;height:32px;border-radius:50%;background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;cursor:pointer}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#fff;padding:6px 12px;border-radius:7px;transition:.15s}
+.back-btn:hover{background:var(--gray2);color:var(--text)}
+
+/* ─── CONTENT ─────────────────────────────────────── */
+.content{padding:28px;flex:1}
+
+/* ─── PAGE HEADER ─────────────────────────────────── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.page-title p{font-size:13px;color:var(--muted);margin-top:2px}
+.btn-primary{display:inline-flex;align-items:center;gap:7px;background:var(--red);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.btn-primary:hover{background:var(--red2)}
+.btn-secondary{display:inline-flex;align-items:center;gap:7px;background:#fff;color:var(--text);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.btn-secondary:hover{background:var(--gray2)}
+.btn-danger{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--red);border:1px solid #fecaca;padding:7px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.btn-danger:hover{background:#fff1f2}
+.btn-ghost{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px 8px;border-radius:5px;font-size:12px;font-weight:600;transition:.15s;display:inline-flex;align-items:center;gap:5px}
+.btn-ghost:hover{background:var(--gray2);color:var(--text)}
+
+/* ─── STAT CARDS ──────────────────────────────────── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.stat-card .sc-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.stat-card .sc-num{font-size:28px;font-weight:900;line-height:1;color:var(--text);margin-bottom:4px}
+.stat-card .sc-sub{font-size:12px;color:var(--muted)}
+.stat-card.highlight{border-color:rgba(220,38,38,.3);background:#fff8f8}
+.stat-card.highlight .sc-num{color:var(--red)}
+
+/* ─── DISCOUNT LIST ───────────────────────────────── */
+.list-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.list-toolbar{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.search-box{flex:1;display:flex;align-items:center;gap:8px;background:var(--gray);border:1px solid var(--border);border-radius:7px;padding:7px 12px}
+.search-box input{border:none;background:transparent;outline:none;font-size:13px;color:var(--text);width:100%}
+.filter-group{display:flex;gap:6px}
+.filter-btn{font-size:12px;padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--muted);cursor:pointer;transition:.15s;font-weight:500}
+.filter-btn:hover{border-color:var(--border2);color:var(--text)}
+.filter-btn.on{border-color:var(--red);color:var(--red);background:#fff8f8;font-weight:700}
+.d-table{width:100%;border-collapse:collapse}
+.d-table thead th{padding:10px 18px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:#fafafa;border-bottom:1px solid var(--border)}
+.d-table tbody tr{border-bottom:1px solid #f8fafc;transition:background .15s}
+.d-table tbody tr:hover{background:#fafafa}
+.d-table tbody tr:last-child{border-bottom:none}
+.d-table td{padding:14px 18px;vertical-align:middle}
+.d-title{font-size:14px;font-weight:700;margin-bottom:3px}
+.d-note{font-size:11px;color:var(--muted)}
+.d-type-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.d-type-badge.pct{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.d-type-badge.flat{background:#f0fdf4;color:#166534;border-color:#bbf7d0}
+.d-type-badge.fixed{background:#fdf4ff;color:#6b21a8;border-color:#e9d5ff}
+.status-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.status-badge::before{content:'●';font-size:8px}
+.status-badge.active{background:#f0fdf4;color:var(--active)}
+.status-badge.scheduled{background:#eff6ff;color:var(--scheduled)}
+.status-badge.paused{background:#f8fafc;color:var(--paused)}
+.status-badge.expired{background:#fff1f2;color:var(--expired)}
+.d-dates{font-size:12px;color:var(--muted);line-height:1.6}
+.d-scope{font-size:12px;color:var(--muted)}
+.row-actions{display:flex;gap:4px;align-items:center}
+.toggle-switch{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#cbd5e1;border-radius:10px;transition:.2s}
+.toggle-track::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-switch input:checked+.toggle-track{background:var(--active)}
+.toggle-switch input:checked+.toggle-track::before{left:19px}
+.empty-state{text-align:center;padding:60px 20px}
+.empty-state .es-icon{font-size:40px;margin-bottom:12px}
+.empty-state h3{font-size:17px;font-weight:700;margin-bottom:6px}
+.empty-state p{color:var(--muted);font-size:14px}
+
+/* ─── FORM LAYOUT ─────────────────────────────────── */
+.form-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+.form-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.form-card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.form-card-header h2{font-size:16px;font-weight:800}
+.form-card-header p{font-size:12px;color:var(--muted);margin-top:2px}
+.form-card-body{padding:24px 22px}
+.form-section{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.form-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.form-section-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px}
+.field .sublabel{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+.field input[type=text],.field input[type=number],.field input[type=datetime-local],.field textarea,.field select{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;color:var(--text);outline:none;transition:.15s;background:#fff;font-family:inherit}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#94a3b8}
+.field textarea{resize:vertical;min-height:64px;line-height:1.5}
+.field .helper{font-size:11px;color:var(--muted);margin-top:4px}
+.field .error{font-size:11px;color:var(--red);margin-top:4px;display:none}
+.field.has-error input,.field.has-error select{border-color:var(--red)}
+.field.has-error .error{display:block}
+.input-group{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.type-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.type-opt{border:2px solid var(--border);border-radius:8px;padding:10px 8px;text-align:center;cursor:pointer;transition:.15s}
+.type-opt:hover{border-color:#94a3b8;background:var(--gray)}
+.type-opt.sel{border-color:var(--red);background:#fff8f8}
+.type-opt .to-icon{font-size:20px;margin-bottom:4px}
+.type-opt .to-label{font-size:11px;font-weight:700;color:var(--text)}
+.type-opt .to-desc{font-size:10px;color:var(--muted);margin-top:1px}
+.applies-row{display:flex;gap:10px}
+.applies-opt{flex:1;border:2px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px}
+.applies-opt:hover{border-color:#94a3b8}
+.applies-opt.sel{border-color:var(--red);background:#fff8f8}
+.applies-opt .ao-circle{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.applies-opt.sel .ao-circle{border-color:var(--red);background:var(--red)}
+.applies-opt.sel .ao-circle::after{content:'';width:6px;height:6px;background:#fff;border-radius:50%}
+.applies-opt .ao-text{font-size:12px;font-weight:700}
+.applies-opt .ao-sub{font-size:11px;color:var(--muted)}
+.course-picker{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:8px;display:none}
+.cp-search{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.cp-search input{border:none;outline:none;font-size:12px;flex:1;color:var(--text)}
+.cp-controls{display:flex;gap:8px;padding:6px 12px;background:#fafafa;border-bottom:1px solid var(--border)}
+.cp-controls button{font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;font-weight:700;padding:2px 4px}
+.cp-list{max-height:200px;overflow-y:auto}
+.cp-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid #f8fafc;cursor:pointer;transition:.1s}
+.cp-item:hover{background:#fafafa}
+.cp-item:last-child{border-bottom:none}
+.cp-item input[type=checkbox]{accent-color:var(--red);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.cp-item .ci-name{font-size:13px;font-weight:600;flex:1}
+.cp-item .ci-price{font-size:11px;color:var(--muted)}
+.active-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--gray);border-radius:8px}
+.active-toggle-row .at-label{font-size:13px;font-weight:700}
+.active-toggle-row .at-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.toggle-lg{position:relative;width:48px;height:26px;flex-shrink:0}
+.toggle-lg input{opacity:0;width:0;height:0}
+.toggle-lg-track{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:13px;transition:.2s}
+.toggle-lg-track::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-lg input:checked+.toggle-lg-track{background:var(--active)}
+.toggle-lg input:checked+.toggle-lg-track::before{left:25px}
+.form-footer{display:flex;align-items:center;gap:10px;padding:18px 22px;border-top:1px solid var(--border);background:#fafafa}
+.form-footer .ff-note{font-size:11px;color:var(--muted);margin-left:auto}
+
+/* ─── PREVIEW PANEL ───────────────────────────────── */
+.preview-panel{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;position:sticky;top:76px}
+.pp-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pp-header h3{font-size:13px;font-weight:800}
+.pp-header .pp-tag{font-size:10px;background:#f0fdf4;color:var(--active);border:1px solid #bbf7d0;padding:2px 8px;border-radius:3px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.pp-body{padding:16px}
+.pp-section-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:14px}
+.pp-section-label:first-child{margin-top:0}
+.pp-sticky{background:var(--red);color:#fff;border-radius:6px;padding:8px 12px;font-size:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.pp-sticky.off{background:#f3f4f6;color:var(--muted);font-style:italic}
+.pp-sticky .ps-cta{background:rgba(255,255,255,.25);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.pp-courses{display:flex;flex-direction:column;gap:8px}
+.pp-course{border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.pp-course .pc-emoji{font-size:22px;flex-shrink:0}
+.pp-course .pc-info{flex:1;min-width:0}
+.pp-course .pc-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-course .pc-cat{font-size:10px;color:var(--muted)}
+.pp-course .pc-prices{text-align:right;flex-shrink:0}
+.pp-course .pc-base{font-size:11px;color:var(--muted);text-decoration:line-through}
+.pp-course .pc-final{font-size:14px;font-weight:900;color:var(--text)}
+.pp-course .pc-no-disc{font-size:14px;font-weight:900;color:var(--text)}
+.pp-course .pc-save{font-size:10px;color:var(--active);font-weight:700;background:#f0fdf4;padding:1px 6px;border-radius:3px}
+.pp-empty{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+.pp-disclaimer{font-size:11px;color:var(--muted);margin-top:12px;padding:10px;background:var(--gray);border-radius:6px;line-height:1.5}
+
+/* ─── CONFLICT MODAL ──────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;display:none}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:480px;max-width:90vw;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:14px}
+.modal-icon{font-size:28px;flex-shrink:0}
+.modal-header h3{font-size:17px;font-weight:800;margin-bottom:4px}
+.modal-header p{font-size:13px;color:var(--muted)}
+.modal-body{padding:20px 24px}
+.conflict-list{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px;margin-bottom:14px}
+.conflict-list h4{font-size:12px;font-weight:700;color:#92400e;margin-bottom:8px}
+.conflict-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #fef3c7;font-size:13px}
+.conflict-item:last-child{border-bottom:none;padding-bottom:0}
+.conflict-item strong{font-weight:700}
+.conflict-item .ci-old{font-size:11px;color:#b45309;background:#fef3c7;padding:2px 7px;border-radius:3px}
+.modal-resolve{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;font-size:13px;color:#166534}
+.modal-resolve strong{font-weight:700}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.btn-confirm{background:var(--red);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;transition:.15s}
+.btn-confirm:hover{background:var(--red2)}
+.btn-cancel-modal{background:#fff;color:var(--text);border:1px solid var(--border);padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.btn-cancel-modal:hover{background:var(--gray2)}
+
+/* ─── TOAST ───────────────────────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.toast-item{background:var(--dark2);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:slideIn .25s ease;max-width:320px}
+.toast-item.success::before{content:'✅'}
+.toast-item.error::before{content:'❌'}
+.toast-item.info::before{content:'ℹ️'}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.toast-item.hide{animation:slideOut .25s ease forwards}
+@keyframes slideOut{to{opacity:0;transform:translateY(10px)}}
+
+/* ─── MISC ────────────────────────────────────────── */
+.tag-all{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.tag-sel{background:#f5f3ff;color:#6b21a8;border-color:#e9d5ff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;display:inline-block}
+.hidden{display:none !important}
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+select option:disabled{color:#9ca3af}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ════════════════════════════════════════════════════ -->
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="logo">Nipro<em>.</em></div>
+    <div class="badge">Admin Panel</div>
+  </div>
+  <div class="sb-section">Main</div>
+  <ul class="sb-nav">
+    <li><a href="#"><span class="sb-icon">📊</span> Dashboard</a></li>
+    <li><a href="#"><span class="sb-icon">📚</span> Courses</a></li>
+    <li class="active"><a href="#"><span class="sb-icon">🏷️</span> Discounts <span class="sb-count" id="sbCount">1</span></a></li>
+    <li><a href="#"><span class="sb-icon">🎓</span> Certificates</a></li>
+    <li><a href="#"><span class="sb-icon">📝</span> Blog</a></li>
+  </ul>
+  <div class="sb-section">System</div>
+  <ul class="sb-nav">
+    <li><a href="#"><span class="sb-icon">⚙️</span> Settings</a></li>
+    <li><a href="#"><span class="sb-icon">🔒</span> Admin Users</a></li>
+  </ul>
+  <div class="sb-footer">
+    <a href="nipro-homepage.html" target="_blank">← View Homepage</a><br>
+    <span style="margin-top:4px;display:block">Changes sync live</span>
+  </div>
+</div>
+
+<!-- ══ MAIN ═══════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="#">Admin</a>
+      <span class="sep">›</span>
+      <span class="cur" id="breadcrumbCur">Discounts</span>
+    </div>
+    <div class="topbar-right">
+      <div class="sync-badge synced" id="syncBadge">● Homepage synced</div>
+      <div class="topbar-user">A</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ VIEW: DISCOUNTS LIST ══════════════════════════════════ -->
+    <div id="viewList">
+      <div class="stat-row">
+        <div class="stat-card highlight">
+          <div class="sc-label">Active Discounts</div>
+          <div class="sc-num" id="statActive">0</div>
+          <div class="sc-sub">Currently live on site</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Scheduled</div>
+          <div class="sc-num" id="statScheduled">0</div>
+          <div class="sc-sub">Starting in future</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Paused</div>
+          <div class="sc-num" id="statPaused">0</div>
+          <div class="sc-sub">Manually disabled</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Expired</div>
+          <div class="sc-num" id="statExpired">0</div>
+          <div class="sc-sub">Past their end date</div>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Discounts</h1>
+          <p>Manage course promotions. Changes go live on homepage immediately.</p>
+        </div>
+        <button class="btn-primary" onclick="openForm(null)">+ Add New Discount</button>
+      </div>
+
+      <div class="list-card">
+        <div class="list-toolbar">
+          <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="Search discounts..." oninput="renderList()">
+          </div>
+          <div class="filter-group">
+            <button class="filter-btn on" onclick="setFilter('all',this)">All</button>
+            <button class="filter-btn" onclick="setFilter('active',this)">Active</button>
+            <button class="filter-btn" onclick="setFilter('scheduled',this)">Scheduled</button>
+            <button class="filter-btn" onclick="setFilter('paused',this)">Paused</button>
+            <button class="filter-btn" onclick="setFilter('expired',this)">Expired</button>
+          </div>
+        </div>
+        <table class="d-table">
+          <thead>
+            <tr>
+              <th style="width:36px"></th>
+              <th>Discount</th>
+              <th>Type</th>
+              <th>Applies To</th>
+              <th>Schedule</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="discountTableBody"></tbody>
+        </table>
+        <div class="empty-state hidden" id="emptyState">
+          <div class="es-icon">🏷️</div>
+          <h3>No discounts found</h3>
+          <p>Create your first discount to start showing offers on the homepage.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VIEW: FORM ════════════════════════════════════════════ -->
+    <div id="viewForm" class="hidden">
+      <div class="page-header">
+        <div class="page-title">
+          <h1 id="formTitle">Add New Discount</h1>
+          <p id="formSubtitle">Fill in the details below. Preview updates live on the right.</p>
+        </div>
+        <button class="back-btn" onclick="closeForm()">← Back to List</button>
+      </div>
+
+      <div class="form-layout">
+        <!-- FORM CARD -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <div>
+              <h2>Discount Details</h2>
+              <p>All fields marked * are required. Admin only fields are never shown on site.</p>
+            </div>
+          </div>
+          <div class="form-card-body">
+
+            <!-- BASIC -->
+            <div class="form-section">
+              <div class="form-section-title">Basic Info</div>
+              <div class="field">
+                <label>Discount Name *</label>
+                <input type="text" id="fTitle" placeholder="e.g. Summer Enrollment Offer 2026" oninput="updatePreview()">
+                <div class="error" id="fTitleErr">Name is required</div>
+              </div>
+              <div class="field">
+                <label>Internal Note <span class="sublabel">(admin only — not shown on site)</span></label>
+                <textarea id="fNote" placeholder="e.g. June batch special — agreed in team meeting" oninput="updatePreview()"></textarea>
+              </div>
+            </div>
+
+            <!-- DISCOUNT TYPE -->
+            <div class="form-section">
+              <div class="form-section-title">Discount Type *</div>
+              <div class="type-selector" id="typeSelector">
+                <div class="type-opt sel" onclick="selectType('percentage',this)">
+                  <div class="to-icon">%</div>
+                  <div class="to-label">Percentage</div>
+                  <div class="to-desc">e.g. 20% off</div>
+                </div>
+                <div class="type-opt" onclick="selectType('flat',this)">
+                  <div class="to-icon">₹−</div>
+                  <div class="to-label">Flat Amount</div>
+                  <div class="to-desc">e.g. ₹500 off</div>
+                </div>
+                <div class="type-opt" onclick="selectType('fixed_price',this)">
+                  <div class="to-icon">₹!</div>
+                  <div class="to-label">Fixed Price</div>
+                  <div class="to-desc">e.g. only ₹999</div>
+                </div>
+              </div>
+              <div style="margin-top:14px">
+                <div class="input-group">
+                  <div class="field" style="margin-bottom:0">
+                    <label id="valueLabel">Discount Percentage *</label>
+                    <input type="number" id="fValue" placeholder="e.g. 20" min="1" max="100" oninput="updatePreview()">
+                    <div class="helper" id="valueHelper">Enter 1–100. Example: 20 means 20% off every course price.</div>
+                    <div class="error" id="fValueErr">Invalid value</div>
+                  </div>
+                  <div class="field" style="margin-bottom:0">
+                    <label>Min Floor Price <span class="sublabel">(optional)</span></label>
+                    <input type="number" id="fFloor" placeholder="e.g. 999" min="0" oninput="updatePreview()">
+                    <div class="helper">Never sell below this price. Leave 0 to skip.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- APPLIES TO -->
+            <div class="form-section">
+              <div class="form-section-title">Course Targeting *</div>
+              <div class="applies-row">
+                <div class="applies-opt sel" id="applyAll" onclick="selectApply('all')">
+                  <div class="ao-circle"></div>
+                  <div>
+                    <div class="ao-text">All Courses</div>
+                    <div class="ao-sub">Applies to every active course</div>
+                  </div>
+                </div>
+                <div class="applies-opt" id="applySel" onclick="selectApply('selected')">
+                  <div class="ao-circle"></div>
+                  <div>
+                    <div class="ao-text">Selected Courses</div>
+                    <div class="ao-sub">You pick which courses</div>
+                  </div>
+                </div>
+              </div>
+              <div class="course-picker" id="coursePicker">
+                <div class="cp-search"><span>🔍</span><input type="text" placeholder="Search courses..." oninput="filterCourses(this.value)" id="cpSearch"></div>
+                <div class="cp-controls">
+                  <button onclick="selectAllCourses(true)">Select All</button>
+                  <button onclick="selectAllCourses(false)">Clear All</button>
+                </div>
+                <div class="cp-list" id="cpList"></div>
+              </div>
+              <div class="error" id="fCourseErr" style="margin-top:8px">Select at least one course</div>
+            </div>
+
+            <!-- SCHEDULE -->
+            <div class="form-section">
+              <div class="form-section-title">Schedule (IST)</div>
+              <div class="input-group">
+                <div class="field" style="margin-bottom:0">
+                  <label>Start Date & Time *</label>
+                  <input type="datetime-local" id="fStart" oninput="updatePreview()">
+                  <div class="error" id="fStartErr">Required</div>
+                </div>
+                <div class="field" style="margin-bottom:0">
+                  <label>End Date & Time *</label>
+                  <input type="datetime-local" id="fEnd" oninput="updatePreview()">
+                  <div class="error" id="fEndErr">Must be after start date</div>
+                </div>
+              </div>
+              <div class="helper" style="margin-top:8px">All times are in Indian Standard Time (IST). The discount goes live and expires at exactly these times. No manual action needed.</div>
+            </div>
+
+            <!-- ACTIVE TOGGLE -->
+            <div class="form-section">
+              <div class="form-section-title">Status</div>
+              <div class="active-toggle-row">
+                <div>
+                  <div class="at-label">Active (live on site)</div>
+                  <div class="at-sub">Toggle off to pause this discount instantly. Can be re-enabled anytime.</div>
+                </div>
+                <label class="toggle-lg">
+                  <input type="checkbox" id="fActive" checked onchange="updatePreview()">
+                  <div class="toggle-lg-track"></div>
+                </label>
+              </div>
+            </div>
+
+          </div>
+          <div class="form-footer">
+            <button class="btn-secondary" onclick="closeForm()">Cancel</button>
+            <button class="btn-primary" onclick="saveDiscount()">💾 Save Discount</button>
+            <span class="ff-note" id="formNote">Preview updates automatically as you type</span>
+          </div>
+        </div>
+
+        <!-- PREVIEW PANEL -->
+        <div class="preview-panel">
+          <div class="pp-header">
+            <h3>Live Preview</h3>
+            <span class="pp-tag">Updates as you type</span>
+          </div>
+          <div class="pp-body">
+            <div class="pp-section-label">Sticky Offer Bar</div>
+            <div class="pp-sticky" id="ppSticky">
+              <span id="ppStickyText">🎉 Enter a discount name to preview the bar</span>
+              <span class="ps-cta">Chat →</span>
+            </div>
+            <div class="pp-section-label">Course Cards <span style="font-weight:400;text-transform:none;font-size:10px;color:var(--muted);">(3 of 6 shown)</span></div>
+            <div class="pp-courses" id="ppCourses"></div>
+            <div class="pp-disclaimer">
+              <strong>How conflicts are resolved:</strong> If this discount overlaps another on the same course, the one saving more money wins automatically. You'll see a warning before saving.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ CONFLICT MODAL ════════════════════════════════════════════ -->
+<div class="modal-overlay" id="conflictModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon">⚠️</div>
+      <div>
+        <h3>Discount Overlap Detected</h3>
+        <p>This discount overlaps with one or more existing active promotions.</p>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="conflict-list">
+        <h4>Conflicting promotions:</h4>
+        <div id="conflictItems"></div>
+      </div>
+      <div class="modal-resolve" id="conflictResolve"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel-modal" onclick="closeConflictModal()">Cancel</button>
+      <button class="btn-secondary" onclick="confirmSave('replace')">Replace Existing</button>
+      <button class="btn-confirm" onclick="confirmSave('keep')">Keep Both</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══════════════════════════════════════════════════════ -->
+<div class="toast" id="toastContainer"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   NIPRO ADMIN — DISCOUNT MANAGEMENT ENGINE
+   Persists to localStorage — homepage reads from same key
+   ═══════════════════════════════════════════════════════════════ */
+
+const COURSES = [
+  {id:'photoshop',   name:'Adobe Photoshop',    cat:'Design',      emoji:'🎨', base:4999},
+  {id:'autocad',     name:'AutoCAD 2D & 3D',    cat:'Design',      emoji:'📐', base:6999},
+  {id:'cpp',         name:'C & C++ Programming', cat:'Programming', emoji:'💻', base:3999},
+  {id:'digi-mktg',   name:'Digital Marketing',  cat:'Marketing',   emoji:'📱', base:5999},
+  {id:'tally',       name:'Tally ERP 9',         cat:'Accounting',  emoji:'📊', base:4499},
+  {id:'ms-office',   name:'MS Office Suite',     cat:'Office',      emoji:'📄', base:2999},
+];
+
+const DEFAULT_DISCOUNTS = [{
+  id:'d1', title:'Summer Enrollment Offer 2026',
+  internal_note:'June batch promotion — approved',
+  discount_type:'percentage', discount_value:20, min_floor_price:0,
+  applies_to:'all', course_ids:[],
+  starts_at:'2026-06-01T00:00', ends_at:'2026-08-31T23:59',
+  is_active:true
+}];
+
+let discounts = loadDiscounts();
+let editingId = null;
+let currentFilter = 'all';
+let pendingSave = null;
+
+/* ─── STORAGE ────────────────────────────────────── */
+function loadDiscounts(){
+  try{const s=localStorage.getItem('nipro_discounts');return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_DISCOUNTS));}
+  catch{return JSON.parse(JSON.stringify(DEFAULT_DISCOUNTS));}
+}
+function saveToStorage(){
+  localStorage.setItem('nipro_discounts',JSON.stringify(discounts));
+  flashSync();
+}
+function flashSync(){
+  const b=document.getElementById('syncBadge');
+  b.textContent='● Syncing...';
+  b.style.background='#fffbeb';b.style.color='#92400e';b.style.borderColor='#fde68a';
+  setTimeout(()=>{b.textContent='● Homepage synced';b.style.background='#f0fdf4';b.style.color='var(--active)';b.style.borderColor='#bbf7d0';},600);
+}
+
+/* ─── STATUS ──────────────────────────────────────── */
+function getStatus(d){
+  const now=new Date();
+  if(!d.is_active) return{label:'Paused',cls:'paused'};
+  if(new Date(d.ends_at)<now) return{label:'Expired',cls:'expired'};
+  if(new Date(d.starts_at)>now) return{label:'Scheduled',cls:'scheduled'};
+  return{label:'Active',cls:'active'};
+}
+
+/* ─── PRICING ──────────────────────────────────────── */
+function calcSaving(base,d){
+  switch(d.discount_type){
+    case'percentage': return base*(d.discount_value/100);
+    case'flat':       return d.discount_value;
+    case'fixed_price':return base-d.discount_value;
+    default:return 0;
+  }
+}
+function getPreviewPricing(cid, base, formData){
+  if(!formData||!formData.is_active) return{base,final:base,saving:0,pct:0,has:false};
+  const now=new Date();
+  if(new Date(formData.starts_at)>now||new Date(formData.ends_at)<now) return{base,final:base,saving:0,pct:0,has:false};
+  if(formData.applies_to==='selected'&&!formData.course_ids.includes(cid)) return{base,final:base,saving:0,pct:0,has:false};
+  if(!formData.discount_value) return{base,final:base,saving:0,pct:0,has:false};
+  const sav=calcSaving(base,formData);
+  const raw=base-sav;
+  const fin=Math.round(Math.max(raw,formData.min_floor_price||0,0));
+  if(fin>=base) return{base,final:base,saving:0,pct:0,has:false};
+  return{base,final:fin,saving:base-fin,pct:Math.round(((base-fin)/base)*100),has:true};
+}
+const inr=n=>'₹'+Math.abs(n).toLocaleString('en-IN');
+
+/* ─── STATS ────────────────────────────────────────── */
+function updateStats(){
+  const counts={active:0,scheduled:0,paused:0,expired:0};
+  discounts.forEach(d=>counts[getStatus(d).cls]++);
+  document.getElementById('statActive').textContent=counts.active;
+  document.getElementById('statScheduled').textContent=counts.scheduled;
+  document.getElementById('statPaused').textContent=counts.paused;
+  document.getElementById('statExpired').textContent=counts.expired;
+  document.getElementById('sbCount').textContent=discounts.length||'0';
+}
+
+/* ─── RENDER LIST ─────────────────────────────────── */
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderList();
+}
+function renderList(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  let list=discounts.filter(d=>{
+    if(q&&!d.title.toLowerCase().includes(q)) return false;
+    if(currentFilter==='all') return true;
+    return getStatus(d).cls===currentFilter;
+  });
+  const tbody=document.getElementById('discountTableBody');
+  const empty=document.getElementById('emptyState');
+  if(!list.length){tbody.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  tbody.innerHTML=list.map(d=>{
+    const st=getStatus(d);
+    const typeBadge=d.discount_type==='percentage'
+      ?`<span class="d-type-badge pct">%  ${d.discount_value}% OFF</span>`
+      :d.discount_type==='flat'
+      ?`<span class="d-type-badge flat">₹−  ₹${d.discount_value} OFF</span>`
+      :`<span class="d-type-badge fixed">₹!  Fixed ₹${d.discount_value}</span>`;
+    const scope=d.applies_to==='all'
+      ?`<span class="tag-all">All Courses</span>`
+      :`<span class="tag-sel">${d.course_ids.length} Course${d.course_ids.length!==1?'s':''}</span>`;
+    const fmtDate=s=>{try{return new Date(s).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return s;}};
+    return`<tr>
+      <td><label class="toggle-switch"><input type="checkbox" ${d.is_active?'checked':''} onchange="toggleActive('${d.id}',this.checked)"><div class="toggle-track"></div></label></td>
+      <td>
+        <div class="d-title">${d.title}</div>
+        ${d.internal_note?`<div class="d-note">Note: ${d.internal_note}</div>`:''}
+      </td>
+      <td>${typeBadge}</td>
+      <td><div class="d-scope">${scope}</div></td>
+      <td><div class="d-dates">${fmtDate(d.starts_at)}<br>→ ${fmtDate(d.ends_at)}</div></td>
+      <td><span class="status-badge ${st.cls}">${st.label}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="btn-ghost" onclick="openForm('${d.id}')">✏️ Edit</button>
+          <button class="btn-danger" onclick="deleteDiscount('${d.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ─── TOGGLE ACTIVE ────────────────────────────────── */
+function toggleActive(id,val){
+  const d=discounts.find(x=>x.id===id);
+  if(!d) return;
+  d.is_active=val;
+  saveToStorage();
+  updateStats();
+  renderList();
+  toast(val?'Discount activated — live on homepage':'Discount paused — hidden from homepage',val?'success':'info');
+}
+
+/* ─── DELETE ───────────────────────────────────────── */
+function deleteDiscount(id){
+  if(!confirm('Delete this discount? This cannot be undone.')) return;
+  discounts=discounts.filter(d=>d.id!==id);
+  saveToStorage();
+  updateStats();
+  renderList();
+  toast('Discount deleted','info');
+}
+
+/* ─── OPEN FORM ────────────────────────────────────── */
+function openForm(id){
+  editingId=id;
+  document.getElementById('viewList').classList.add('hidden');
+  document.getElementById('viewForm').classList.remove('hidden');
+  document.getElementById('breadcrumbCur').textContent=id?'Edit Discount':'New Discount';
+
+  if(id){
+    const d=discounts.find(x=>x.id===id);
+    document.getElementById('formTitle').textContent='Edit Discount';
+    document.getElementById('formSubtitle').textContent='Update the discount details below. Homepage reflects changes instantly on save.';
+    document.getElementById('fTitle').value=d.title;
+    document.getElementById('fNote').value=d.internal_note||'';
+    document.getElementById('fValue').value=d.discount_value;
+    document.getElementById('fFloor').value=d.min_floor_price||'';
+    document.getElementById('fStart').value=d.starts_at;
+    document.getElementById('fEnd').value=d.ends_at;
+    document.getElementById('fActive').checked=d.is_active;
+    selectType(d.discount_type);
+    selectApply(d.applies_to);
+    if(d.applies_to==='selected'){
+      document.querySelectorAll('.cp-check').forEach(cb=>{
+        cb.checked=d.course_ids.includes(cb.value);
+      });
+    }
+  } else {
+    document.getElementById('formTitle').textContent='Add New Discount';
+    document.getElementById('formSubtitle').textContent='Fill in the details below. Preview updates live on the right.';
+    document.getElementById('fTitle').value='';
+    document.getElementById('fNote').value='';
+    document.getElementById('fValue').value='20';
+    document.getElementById('fFloor').value='';
+    const now=new Date();
+    const pad=n=>String(n).padStart(2,'0');
+    const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    document.getElementById('fStart').value=fmt(now);
+    const end=new Date(now);end.setDate(end.getDate()+30);
+    document.getElementById('fEnd').value=fmt(end);
+    document.getElementById('fActive').checked=true;
+    selectType('percentage');
+    selectApply('all');
+  }
+  clearErrors();
+  buildCoursePicker();
+  updatePreview();
+}
+
+function closeForm(){
+  editingId=null;
+  document.getElementById('viewForm').classList.add('hidden');
+  document.getElementById('viewList').classList.remove('hidden');
+  document.getElementById('breadcrumbCur').textContent='Discounts';
+}
+
+/* ─── TYPE & APPLY SELECTORS ───────────────────────── */
+let currentType='percentage';
+let currentApply='all';
+
+function selectType(t,el){
+  currentType=t;
+  document.querySelectorAll('.type-opt').forEach(o=>o.classList.remove('sel'));
+  if(el){el.classList.add('sel');}
+  else{
+    const idx={percentage:0,flat:1,fixed_price:2}[t];
+    document.querySelectorAll('.type-opt')[idx]?.classList.add('sel');
+  }
+  const lbl=document.getElementById('valueLabel');
+  const hlp=document.getElementById('valueHelper');
+  const inp=document.getElementById('fValue');
+  if(t==='percentage'){
+    lbl.textContent='Discount Percentage *';
+    hlp.textContent='Enter 1–100. Example: 20 means 20% off each course price.';
+    inp.min=1;inp.max=100;inp.placeholder='e.g. 20';
+  } else if(t==='flat'){
+    lbl.textContent='Flat Amount Off (₹) *';
+    hlp.textContent='E.g. 500 means ₹500 off. If the saving exceeds floor price, floor price kicks in.';
+    inp.min=1;inp.max=999999;inp.placeholder='e.g. 500';
+  } else {
+    lbl.textContent='Fixed Final Price (₹) *';
+    hlp.textContent='Course will be shown at exactly this price regardless of base price.';
+    inp.min=1;inp.max=999999;inp.placeholder='e.g. 999';
+  }
+  updatePreview();
+}
+
+function selectApply(a){
+  currentApply=a;
+  document.getElementById('applyAll').classList.toggle('sel',a==='all');
+  document.getElementById('applySel').classList.toggle('sel',a==='selected');
+  const picker=document.getElementById('coursePicker');
+  picker.style.display=a==='selected'?'block':'none';
+  updatePreview();
+}
+
+/* ─── COURSE PICKER ────────────────────────────────── */
+function buildCoursePicker(filter=''){
+  const list=document.getElementById('cpList');
+  list.innerHTML=COURSES.filter(c=>!filter||c.name.toLowerCase().includes(filter.toLowerCase())).map(c=>`
+    <div class="cp-item" onclick="toggleCourse('${c.id}')">
+      <input type="checkbox" class="cp-check" value="${c.id}" id="cc_${c.id}">
+      <span style="font-size:18px">${c.emoji}</span>
+      <div style="flex:1"><div class="ci-name">${c.name}</div><div class="ci-price">${c.cat} · Base: ${inr(c.base)}</div></div>
+    </div>`).join('');
+}
+function filterCourses(v){buildCoursePicker(v);updatePreview();}
+function toggleCourse(id){
+  const cb=document.getElementById('cc_'+id);
+  cb.checked=!cb.checked;
+  updatePreview();
+}
+function selectAllCourses(v){
+  document.querySelectorAll('.cp-check').forEach(cb=>cb.checked=v);
+  updatePreview();
+}
+function getSelectedCourses(){
+  return [...document.querySelectorAll('.cp-check:checked')].map(cb=>cb.value);
+}
+
+/* ─── GET FORM DATA ────────────────────────────────── */
+function getFormData(){
+  return{
+    title:document.getElementById('fTitle').value.trim(),
+    internal_note:document.getElementById('fNote').value.trim(),
+    discount_type:currentType,
+    discount_value:parseFloat(document.getElementById('fValue').value)||0,
+    min_floor_price:parseFloat(document.getElementById('fFloor').value)||0,
+    applies_to:currentApply,
+    course_ids:currentApply==='selected'?getSelectedCourses():[],
+    starts_at:document.getElementById('fStart').value,
+    ends_at:document.getElementById('fEnd').value,
+    is_active:document.getElementById('fActive').checked,
+  };
+}
+
+/* ─── LIVE PREVIEW ─────────────────────────────────── */
+function updatePreview(){
+  const fd=getFormData();
+  const ppSticky=document.getElementById('ppSticky');
+  const ppStickyText=document.getElementById('ppStickyText');
+
+  if(fd.is_active&&fd.title){
+    ppSticky.classList.remove('off');
+    let typeStr='';
+    if(fd.discount_type==='percentage'&&fd.discount_value) typeStr=` — ${fd.discount_value}% OFF`;
+    else if(fd.discount_type==='flat'&&fd.discount_value) typeStr=` — ₹${fd.discount_value} OFF`;
+    else if(fd.discount_type==='fixed_price'&&fd.discount_value) typeStr=` — Prices from ₹${fd.discount_value}`;
+    ppStickyText.innerHTML=`🎉 <strong>${fd.title||'Discount Name'}</strong>${typeStr} · Limited time.`;
+  } else {
+    ppSticky.classList.add('off');
+    ppStickyText.textContent=fd.title?'Discount is paused — sticky bar will be hidden':'Enter a discount name above';
+  }
+
+  const preview=COURSES.slice(0,3).map(c=>{
+    const p=getPreviewPricing(c.id,c.base,fd);
+    let floorWarning = '';
+    if (p.has && fd.min_floor_price > 0 && p.final === fd.min_floor_price && (c.base - calcSaving(c.base, fd)) < fd.min_floor_price) {
+      floorWarning = `<div style="font-size:10px;color:var(--red);margin-top:4px">⚠️ Clamped to floor price</div>`;
+    }
+    return`<div class="pp-course" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="pc-emoji">${c.emoji}</span>
+        <div class="pc-info">
+          <div class="pc-name">${c.name}</div>
+          <div class="pc-cat">${c.cat}</div>
+        </div>
+        <div class="pc-prices">
+          ${p.has
+            ?`<div class="pc-base">${inr(p.base)}</div><div class="pc-final">${inr(p.final)}</div><div class="pc-save">-${p.pct}%</div>`
+            :`<div class="pc-no-disc">${inr(p.base)}</div>`
+          }
+        </div>
+      </div>
+      ${floorWarning}
+    </div>`;
+  }).join('');
+  document.getElementById('ppCourses').innerHTML=preview;
+}
+
+/* ─── CONFLICT DETECTION ───────────────────────────── */
+function detectConflicts(fd,editingId){
+  const now=new Date();
+  const fStart=new Date(fd.starts_at);
+  const fEnd=new Date(fd.ends_at);
+  const result=[];
+  discounts.forEach(d=>{
+    if(d.id===editingId) return;
+    if(!d.is_active) return;
+    if(new Date(d.ends_at)<now) return;
+    const datesOverlap=fStart<=new Date(d.ends_at)&&fEnd>=new Date(d.starts_at);
+    if(!datesOverlap) return;
+    const courseOverlap=fd.applies_to==='all'||d.applies_to==='all'
+      ||fd.course_ids.some(id=>d.course_ids.includes(id));
+    if(courseOverlap) result.push(d);
+  });
+  return result;
+}
+
+/* ─── VALIDATION ────────────────────────────────────── */
+function clearErrors(){
+  ['fTitleErr','fValueErr','fStartErr','fEndErr','fCourseErr'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display='none';
+  });
+  ['fTitle','fValue'].forEach(id=>{
+    const f=document.getElementById(id)?.closest('.field');
+    if(f)f.classList.remove('has-error');
+  });
+  document.getElementById('fCourseErr').style.display='none';
+}
+function showError(errId,fieldId){
+  document.getElementById(errId).style.display='block';
+  if(fieldId){const f=document.getElementById(fieldId)?.closest('.field');if(f)f.classList.add('has-error');}
+}
+function validate(fd){
+  clearErrors();
+  let ok=true;
+  if(!fd.title){showError('fTitleErr','fTitle');ok=false;}
+  if(!fd.discount_value||fd.discount_value<=0){showError('fValueErr','fValue');ok=false;}
+  if(fd.discount_type==='percentage'&&fd.discount_value>100){showError('fValueErr','fValue');document.getElementById('fValueErr').textContent='Percentage cannot exceed 100';ok=false;}
+  if(!fd.starts_at){showError('fStartErr','fStart');ok=false;}
+  if(!fd.ends_at){showError('fEndErr','fEnd');ok=false;}
+  if(fd.starts_at&&fd.ends_at&&new Date(fd.ends_at)<=new Date(fd.starts_at)){
+    showError('fEndErr','fEnd');document.getElementById('fEndErr').textContent='End must be after start';ok=false;
+  }
+  if(fd.applies_to==='selected'&&fd.course_ids.length===0){
+    document.getElementById('fCourseErr').style.display='block';ok=false;
+  }
+  return ok;
+}
+
+/* ─── SAVE ──────────────────────────────────────────── */
+function saveDiscount(){
+  const fd=getFormData();
+  if(!validate(fd)) return;
+  const conflicts=detectConflicts(fd,editingId);
+  if(conflicts.length){
+    pendingSave={fd, conflicts};
+    showConflictModal(conflicts,fd);
+  } else {
+    doSave(fd);
+  }
+}
+
+function doSave(fd){
+  if(editingId){
+    const idx=discounts.findIndex(d=>d.id===editingId);
+    if(idx>-1) discounts[idx]={...discounts[idx],...fd};
+  } else {
+    discounts.push({id:'d_'+Date.now(),...fd});
+  }
+  saveToStorage();
+  updateStats();
+  renderList();
+  closeForm();
+  toast(editingId?'Discount updated — homepage synced':'Discount created — live on homepage','success');
+  pendingSave=null;
+  editingId=null;
+}
+
+/* ─── CONFLICT MODAL ────────────────────────────────── */
+function showConflictModal(conflicts,fd){
+  const items=document.getElementById('conflictItems');
+  items.innerHTML=conflicts.map(d=>{
+    const st=getStatus(d);
+    const typeStr=d.discount_type==='percentage'?`${d.discount_value}% OFF`:d.discount_type==='flat'?`₹${d.discount_value} OFF`:`Fixed ₹${d.discount_value}`;
+    return`<div class="conflict-item"><strong>${d.title}</strong><span class="ci-old ${st.cls}">${typeStr} · ${st.label}</span></div>`;
+  }).join('');
+  const resolve=document.getElementById('conflictResolve');
+  resolve.innerHTML=`<strong>How do you want to handle this?</strong><br>
+  - <strong>Replace Existing:</strong> This will automatically pause the conflicting discounts.<br>
+  - <strong>Keep Both:</strong> Homepage will automatically pick the deal that saves the student the most money in rupees.`;
+  document.getElementById('conflictModal').classList.add('open');
+}
+function closeConflictModal(){
+  document.getElementById('conflictModal').classList.remove('open');
+  pendingSave=null;
+}
+function confirmSave(action){
+  document.getElementById('conflictModal').classList.remove('open');
+  if(!pendingSave) return;
+  if(action === 'replace'){
+    pendingSave.conflicts.forEach(c => {
+      const idx = discounts.findIndex(d => d.id === c.id);
+      if(idx > -1) discounts[idx].is_active = false;
+    });
+  }
+  doSave(pendingSave.fd);
+}
+
+/* ─── TOAST ─────────────────────────────────────────── */
+function toast(msg,type='info'){
+  const container=document.getElementById('toastContainer');
+  const el=document.createElement('div');
+  el.className=`toast-item ${type}`;
+  el.textContent=msg;
+  container.appendChild(el);
+  setTimeout(()=>{el.classList.add('hide');setTimeout(()=>el.remove(),300);},3000);
+}
+
+/* ─── CROSS-FILE SYNC ────────────────────────────────── */
+window.addEventListener('storage',e=>{
+  if(e.key==='nipro_discounts'){
+    discounts=e.newValue?JSON.parse(e.newValue):DEFAULT_DISCOUNTS;
+    updateStats();
+    renderList();
+    flashSync();
+  }
+});
+
+/* ─── INIT ───────────────────────────────────────────── */
+buildCoursePicker();
+updateStats();
+renderList();
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-export type { Course, BlogPost, Certificate, SiteSettings, Discount } from './types';
-import { Course, BlogPost, Certificate, SiteSettings, Discount } from './types';
+export type { Course, BlogPost, Certificate, SiteSettings, Discount, Faculty } from './types';
+import { Course, BlogPost, Certificate, SiteSettings, Discount, Faculty } from './types';
 import { getSupabaseClient } from './supabase';
 
 // Certificate Functions
@@ -32,11 +32,11 @@ export async function getCertificates(): Promise<Certificate[]> {
 
 export async function getCertificateById(id: string): Promise<Certificate | null> {
   const supabase = await getSupabaseClient();
-  // Use case-insensitive search across id and search_alias
+  // Strict exact-match on ID only — no alias search, no case-insensitive matching
   const { data, error } = await supabase
     .from('certificates')
     .select('*')
-    .or(`id.ilike.${id},search_alias.ilike.${id}`)
+    .eq('id', id)
     .maybeSingle();
 
   if (error) {
@@ -137,7 +137,6 @@ export async function getCourses(): Promise<Course[]> {
     price: course.price,
     originalPrice: course.original_price,
     shortDescription: course.short_description,
-    description: course.long_description,
     image: course.image,
     mode: course.mode as 'Online' | 'Offline' | 'Both',
     certification: course.certification,
@@ -168,12 +167,29 @@ export async function getCourseById(id: string): Promise<Course | null> {
     price: data.price,
     originalPrice: data.original_price,
     shortDescription: data.short_description,
-    description: data.long_description,
     image: data.image,
     mode: data.mode as 'Online' | 'Offline' | 'Both',
     certification: data.certification,
     status: data.status as 'Active' | 'Inactive'
   };
+}
+
+export async function getUniqueCategories(): Promise<string[]> {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from('courses')
+    .select('category');
+
+  if (error) {
+    console.error('Error fetching unique categories:', error);
+    return [];
+  }
+
+  const categories = data
+    .map(c => c.category)
+    .filter((cat): cat is string => typeof cat === 'string' && cat.trim() !== '');
+
+  return Array.from(new Set(categories)).sort();
 }
 
 export async function createCourse(course: Course): Promise<void> {
@@ -188,7 +204,7 @@ export async function createCourse(course: Course): Promise<void> {
       price: course.price,
       original_price: course.originalPrice,
       short_description: course.shortDescription,
-      long_description: course.description,
+      description: course.description,
       image: course.image,
       mode: course.mode,
       certification: course.certification,
@@ -207,7 +223,7 @@ export async function updateCourse(id: string, course: Partial<Course>): Promise
   if (course.price !== undefined) updateData.price = course.price;
   if (course.originalPrice !== undefined) updateData.original_price = course.originalPrice;
   if (course.shortDescription !== undefined) updateData.short_description = course.shortDescription;
-  if (course.description !== undefined) updateData.long_description = course.description;
+  if (course.description !== undefined) updateData.description = course.description;
   if (course.image !== undefined) updateData.image = course.image;
   if (course.mode !== undefined) updateData.mode = course.mode;
   if (course.certification !== undefined) updateData.certification = course.certification;
@@ -233,13 +249,19 @@ export async function deleteCourse(id: string): Promise<void> {
 
 // ─── Blog Functions (Single-Item Mutations) ──────────────────────────────────
 
-export async function getBlogPosts(): Promise<BlogPost[]> {
+export async function getBlogPosts(publishedOnly = false): Promise<BlogPost[]> {
   const supabase = await getSupabaseClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('blogs')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(10);
+
+  if (publishedOnly) {
+    query = query.eq('status', 'Published');
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching blogs:', error);
@@ -341,9 +363,18 @@ export async function getDiscounts(): Promise<Discount[]> {
     id: d.id,
     title: d.title,
     description: d.description,
-    percentage: d.percentage,
-    validUntil: d.valid_until,
-    createdAt: d.created_at
+    discount_type: d.discount_type,
+    discount_value: d.discount_value,
+    min_floor_price: d.min_floor_price,
+    promo_surface: d.promo_surface,
+    popup_mode: d.popup_mode,
+    applies_to: d.applies_to,
+    course_ids: d.course_ids,
+    starts_at: d.starts_at,
+    ends_at: d.ends_at,
+    is_active: d.is_active,
+    internal_note: d.internal_note,
+    created_at: d.created_at
   }));
 }
 
@@ -354,8 +385,17 @@ export async function createDiscount(discount: Omit<Discount, 'id'>): Promise<vo
     .insert([{
       title: discount.title,
       description: discount.description,
-      percentage: discount.percentage,
-      valid_until: discount.validUntil
+      discount_type: discount.discount_type,
+      discount_value: discount.discount_value,
+      min_floor_price: discount.min_floor_price,
+      promo_surface: discount.promo_surface,
+      popup_mode: discount.popup_mode,
+      applies_to: discount.applies_to,
+      course_ids: discount.course_ids,
+      starts_at: discount.starts_at,
+      ends_at: discount.ends_at,
+      is_active: discount.is_active,
+      internal_note: discount.internal_note
     }]);
 
   if (error) throw error;
@@ -366,8 +406,17 @@ export async function updateDiscount(id: string, discount: Partial<Discount>): P
   const updateData: Record<string, unknown> = {};
   if (discount.title !== undefined) updateData.title = discount.title;
   if (discount.description !== undefined) updateData.description = discount.description;
-  if (discount.percentage !== undefined) updateData.percentage = discount.percentage;
-  if (discount.validUntil !== undefined) updateData.valid_until = discount.validUntil;
+  if (discount.discount_type !== undefined) updateData.discount_type = discount.discount_type;
+  if (discount.discount_value !== undefined) updateData.discount_value = discount.discount_value;
+  if (discount.min_floor_price !== undefined) updateData.min_floor_price = discount.min_floor_price;
+  if (discount.promo_surface !== undefined) updateData.promo_surface = discount.promo_surface;
+  if (discount.popup_mode !== undefined) updateData.popup_mode = discount.popup_mode;
+  if (discount.applies_to !== undefined) updateData.applies_to = discount.applies_to;
+  if (discount.course_ids !== undefined) updateData.course_ids = discount.course_ids;
+  if (discount.starts_at !== undefined) updateData.starts_at = discount.starts_at;
+  if (discount.ends_at !== undefined) updateData.ends_at = discount.ends_at;
+  if (discount.is_active !== undefined) updateData.is_active = discount.is_active;
+  if (discount.internal_note !== undefined) updateData.internal_note = discount.internal_note;
 
   const { error } = await supabase
     .from('discounts')
@@ -388,6 +437,51 @@ export async function deleteDiscount(id: string): Promise<void> {
 }
 
 // ─── Settings Functions (Singleton Update Only) ──────────────────────────────
+
+export async function getFaculty(): Promise<Faculty[]> {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from('faculty')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching faculty:', error);
+    return [];
+  }
+
+  return data as Faculty[];
+}
+
+export async function createFaculty(faculty: Omit<Faculty, 'id' | 'created_at'>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase
+    .from('faculty')
+    .insert([faculty]);
+
+  if (error) throw error;
+}
+
+export async function updateFaculty(id: string, faculty: Partial<Faculty>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase
+    .from('faculty')
+    .update(faculty)
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function deleteFaculty(id: string): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase
+    .from('faculty')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = await getSupabaseClient();

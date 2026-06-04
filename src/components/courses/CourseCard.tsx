@@ -7,18 +7,34 @@ import { motion } from 'framer-motion';
 import { Clock, Globe, BookOpen, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Course } from '@/lib/types';
+import type { Course, Discount } from '@/lib/types';
+import { calculateFinalPrice } from '@/lib/pricing';
+import { SiteSettings } from '@/lib/data-service';
 
 interface CourseCardProps {
   course: Course;
+  discounts?: Discount[];
   index?: number;
+  settings?: SiteSettings | null;
 }
 
-export function CourseCard({ course, index = 0 }: CourseCardProps) {
-  const hasDiscount = course.originalPrice && course.originalPrice > (course.price || 0);
-  const discountPercentage = hasDiscount 
-    ? Math.round(((course.originalPrice! - course.price!) / course.originalPrice!) * 100)
+export function CourseCard({ course, discounts, index = 0, settings }: CourseCardProps) {
+  const basePrice = course.originalPrice || course.price || 0;
+  
+  // Filter discounts applicable to this course
+  const applicableDiscounts = discounts?.filter(d => 
+    d.applies_to === 'all' || (d.applies_to === 'selected' && d.course_ids?.includes(course.id))
+  ) || [];
+
+  const pricingResult = calculateFinalPrice(basePrice, applicableDiscounts);
+  const finalPrice = pricingResult.finalPrice;
+  const hasDiscount = pricingResult.hasDiscount;
+  const discountPercentage = hasDiscount && basePrice > 0
+    ? Math.round(((basePrice - finalPrice) / basePrice) * 100)
     : 0;
+
+  const whatsappNumber = settings?.contact?.whatsapp?.replace(/\D/g, '') || settings?.contact?.phone?.replace(/\D/g, '') || '919000000000';
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi, I am interested in the ${course.name} course.`)}`;
 
   return (
     <motion.div
@@ -86,19 +102,19 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className="text-xs text-slate-400 line-through decoration-nipro-red/40 font-medium">
-                      ₹{course.originalPrice?.toLocaleString()}
+                      ₹{basePrice.toLocaleString()}
                     </span>
                     <span className="text-[9px] bg-nipro-red/10 text-nipro-red px-1.5 py-0.5 rounded-full font-bold">
                       -{discountPercentage}%
                     </span>
                   </div>
                   <span className="text-2xl font-bold text-slate-900 tracking-tight">
-                    ₹{course.price?.toLocaleString()}
+                    ₹{finalPrice.toLocaleString()}
                   </span>
                 </div>
               ) : (
                 <span className="text-2xl font-bold text-slate-900 tracking-tight">
-                  {course.price ? `₹${course.price.toLocaleString()}` : 'Price on Request'}
+                  {finalPrice ? `₹${finalPrice.toLocaleString()}` : 'Price on Request'}
                 </span>
               )}
             </div>
@@ -113,7 +129,7 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
 
         <CardFooter className="p-6 pt-0">
           <Button asChild className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white font-semibold h-10 rounded-full transition-all duration-300 text-xs tracking-wide shadow-sm cursor-pointer">
-            <Link href={`https://wa.me/919000000000?text=Hi, I am interested in the ${course.name} course.`} target="_blank" className="w-full flex items-center justify-center gap-1.5">
+            <Link href={whatsappUrl} target="_blank" className="w-full flex items-center justify-center gap-1.5">
               Talk to Us on WhatsApp
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.67-1.611-.916-2.205-.24-.582-.48-.504-.67-.514-.19-.01-.408-.012-.625-.012-.217 0-.569.082-.867.409-.297.327-1.134 1.109-1.134 2.705 0 1.597 1.163 3.138 1.323 3.354.16.216 2.285 3.49 5.535 4.894.773.333 1.377.532 1.847.681.777.247 1.485.212 2.043.128.621-.093 1.758-.718 2.008-1.411.25-.694.25-1.288.175-1.411-.075-.124-.273-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.98 1.001-3.647-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .018 5.396.015 12.032c0 2.121.554 4.189 1.605 5.97L0 24l6.12-.16a11.84 11.84 0 005.928 1.592h.005c6.634 0 12.031-5.396 12.035-12.032a11.772 11.772 0 00-3.525-8.435z"/>

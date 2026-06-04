@@ -4,14 +4,17 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Course } from '@/lib/types';
+import type { Course, Discount } from '@/lib/types';
 import { CourseCard } from '@/components/courses/CourseCard';
+import { SiteSettings } from '@/lib/data-service';
 
 interface FeaturedCoursesProps {
   courses: Course[];
+  discounts?: Discount[];
+  settings?: SiteSettings | null;
 }
 
-export function FeaturedCourses({ courses }: FeaturedCoursesProps) {
+export function FeaturedCourses({ courses, discounts, settings }: FeaturedCoursesProps) {
   return (
     <section className="bg-gray-50 py-28 relative bg-grid-slate-100">
       {/* Soft Radial Glow */}
@@ -37,7 +40,7 @@ export function FeaturedCourses({ courses }: FeaturedCoursesProps) {
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {courses.slice(0, 3).map((course, index) => (
-            <CourseCard key={course.id} course={course} index={index} />
+            <CourseCard key={course.id} course={course} discounts={discounts} index={index} settings={settings} />
           ))}
         </div>
       </div>

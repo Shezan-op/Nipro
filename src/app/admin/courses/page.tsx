@@ -16,13 +16,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { getCoursesAction, createCourseAction, updateCourseAction, deleteCourseAction, uploadFileAction } from '@/lib/actions';
+import { getCoursesAction, createCourseAction, updateCourseAction, deleteCourseAction, uploadFileAction, getUniqueCategoriesAction } from '@/lib/actions';
 import { Course } from '@/lib/data-service';
 import { CourseSchema } from '@/lib/schemas';
 import { z } from 'zod';
 
 export default function AdminCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
@@ -35,8 +36,10 @@ export default function AdminCourses() {
     let mounted = true;
     const init = async () => {
       const data = await getCoursesAction();
+      const cats = await getUniqueCategoriesAction();
       if (mounted) {
         setCourses(data);
+        setCategories(cats);
         setLoading(false);
       }
     };
@@ -46,7 +49,9 @@ export default function AdminCourses() {
 
   const reloadCourses = async () => {
     const data = await getCoursesAction();
+    const cats = await getUniqueCategoriesAction();
     setCourses(data);
+    setCategories(cats);
   };
 
   const handleEdit = (course: Course) => {
@@ -207,8 +212,14 @@ export default function AdminCourses() {
                   placeholder="e.g. Accounting"
                   value={formState?.category || ''}
                   onChange={e => setFormState({...formState!, category: e.target.value})}
+                  list="course-categories"
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
                 />
+                <datalist id="course-categories">
+                  {categories.map(cat => (
+                    <option key={cat} value={cat} />
+                  ))}
+                </datalist>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Duration</label>

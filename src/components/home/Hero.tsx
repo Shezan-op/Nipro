@@ -2,123 +2,123 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, ShieldCheck, Award, Users, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SiteSettings } from '@/lib/data-service';
+import { SiteSettings, Discount } from '@/lib/data-service';
 
-export function Hero({ settings }: { settings?: SiteSettings }) {
-  const whatsappUrl = `https://wa.me/${settings?.contact?.whatsapp?.replace(/\D/g, '') || '919000000000'}`;
+export function Hero({ settings, discount }: { settings?: SiteSettings, discount?: Discount | null }) {
+  const whatsappUrl = `https://wa.me/${settings?.contact?.whatsapp?.replace(/\D/g, '') || settings?.contact?.phone?.replace(/\D/g, '') || '919000000000'}`;
+
   return (
-    <section className="relative w-full py-16 md:py-24 min-h-[calc(100vh-5rem)] flex items-center justify-center bg-slate-950 bg-gradient-to-b from-slate-900 to-slate-950 bg-grid-white-5">
-      {/* Soft Radial Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(214,31,38,0.08),transparent_70%)] pointer-events-none" />
+    <section className="relative w-full bg-[#0a0a0a]">
+      <div className="container mx-auto px-5 sm:px-8 lg:px-12 pt-10 pb-14 sm:pt-16 sm:pb-20 lg:pt-24 lg:pb-28">
 
-      {/* Content Layer */}
-      <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center">
-        {/* Centered Logo - Premium Placement */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-12"
-        >
-          <Image
-            src="/images/Logo.png"
-            alt="Nipro Computer Education"
-            width={632}
-            height={413}
-            className="w-[320px] sm:w-[500px] h-auto object-contain drop-shadow-[0_0_40px_rgba(214,31,38,0.4)] animate-fade-in"
-            priority
-          />
-        </motion.div>
+        {/* Mobile: stacked top-to-bottom. Desktop: two columns side by side */}
+        <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
 
-        {/* Messaging Area */}
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Official Badge */}
+          {/* Logo — shown first on mobile (top), right col on desktop */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md px-6 py-2.5 text-xs sm:text-sm font-bold text-white mb-8 border border-white/20 shadow-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="flex justify-center lg:justify-end lg:order-2 mb-8 lg:mb-0"
           >
-            <ShieldCheck className="h-4 w-4 text-green-400" />
-            <span className="tracking-widest uppercase">Official Govt. Recognised Training Centre</span>
-            <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+            <Image
+              src="/images/Logo.png"
+              alt="Nipro Computer Education"
+              width={632}
+              height={413}
+              className="w-[180px] sm:w-[260px] lg:w-[380px] h-auto object-contain"
+              priority
+            />
           </motion.div>
 
-          {/* Impactful Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-5xl sm:text-7xl lg:text-9xl font-black text-white leading-[0.9] tracking-tighter mb-8 drop-shadow-2xl"
-          >
-            MASTER JOB-READY <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-nipro-red via-red-500 to-red-600 drop-shadow-[0_0_30px_rgba(214,31,38,0.5)]">
-              COMPUTER SKILLS
-            </span>
-          </motion.h1>
+          {/* Copy — left col on desktop, below logo on mobile */}
+          <div className="lg:order-1">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-[12px] text-neutral-500 font-medium mb-4 sm:mb-5 flex flex-wrap gap-2 items-center"
+            >
+              <span>Govt. Recognised · Since 2014 · Korutla, Telangana</span>
+              {discount && (
+                <span className="inline-flex items-center bg-nipro-red/20 text-nipro-red px-2 py-0.5 rounded-full font-bold text-[10px] tracking-widest uppercase border border-nipro-red/30">
+                  🎉 Special Enrollment Offer
+                </span>
+              )}
+            </motion.p>
 
-          {/* Benefits-Oriented Subheadline */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-lg sm:text-2xl text-slate-300 max-w-2xl mx-auto mb-12 font-medium leading-relaxed tracking-tight"
-          >
-            Empowering 20,000+ students in Korutla with job-ready skills in Design, Accounting, and IT. Get certified by the experts.
-          </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="text-[2rem] sm:text-[2.6rem] lg:text-[3.2rem] font-semibold text-white leading-[1.1] tracking-[-0.03em] mb-4 sm:mb-5"
+            >
+              Learn the skills<br />
+              that actually get<br />
+              you <span className="text-[#d61f26]">hired.</span>
+            </motion.h1>
 
-          {/* Conversion-Focused CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.0 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
-          >
-            <Button asChild size="lg" className="bg-nipro-red hover:bg-red-700 text-white h-16 px-12 text-xl font-black rounded-2xl shadow-[0_20px_50px_rgba(214,31,38,0.4)] transition-all hover:scale-105 active:scale-95">
-              <Link href={whatsappUrl}>
-                <MessageCircle className="mr-3 h-6 w-6 text-white" />
-                Enquire on WhatsApp
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="text-neutral-400 text-sm sm:text-base leading-relaxed max-w-sm mb-7 sm:mb-8"
+            >
+              Practical computer training in Tally, AutoCAD, DTP, and more —
+              with real certification that employers trust.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="flex flex-col sm:flex-row gap-3 mb-10"
+            >
+              <Link
+                href={whatsappUrl}
+                className="inline-flex items-center justify-center gap-2 bg-[#d61f26] hover:bg-[#b91c22] text-white h-11 px-6 text-sm font-semibold rounded-xl transition-colors w-full sm:w-auto"
+              >
+                <MessageCircle className="h-4 w-4 flex-shrink-0" />
+                Enquire Now
               </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="bg-white/5 backdrop-blur-lg border-white/20 text-white hover:bg-white/10 h-16 px-12 text-xl font-black rounded-2xl transition-all hover:scale-105 active:scale-95">
-              <Link href="/courses">
-                <Sparkles className="mr-3 h-6 w-6 text-nipro-red" />
-                Explore Courses
+              <Link
+                href="/courses"
+                className="inline-flex items-center justify-center gap-2 text-neutral-400 hover:text-white h-11 px-6 text-sm font-medium rounded-xl transition-colors group w-full sm:w-auto"
+              >
+                Browse Courses
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
               </Link>
-            </Button>
-          </motion.div>
+            </motion.div>
+
+            {/* Stats — horizontal pill row, not a grid */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex items-center gap-0 border-t border-white/[0.08] pt-6"
+            >
+              <div className="flex-1 text-center sm:text-left">
+                <div className="text-base font-semibold text-white">20k+</div>
+                <div className="text-[11px] text-neutral-500 mt-0.5">Students</div>
+              </div>
+              <div className="w-px h-8 bg-white/[0.08]" />
+              <div className="flex-1 text-center">
+                <div className="text-base font-semibold text-white">15+</div>
+                <div className="text-[11px] text-neutral-500 mt-0.5">Courses</div>
+              </div>
+              <div className="w-px h-8 bg-white/[0.08]" />
+              <div className="flex-1 text-center sm:text-right">
+                <div className="text-base font-semibold text-white">10 yrs</div>
+                <div className="text-[11px] text-neutral-500 mt-0.5">Experience</div>
+              </div>
+            </motion.div>
+          </div>
         </div>
-
-        {/* Bottom Trust Indicators */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.3 }}
-          className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-12 max-w-4xl w-full border-t border-white/10 pt-10"
-        >
-          <TrustBadge icon={<Users className="h-6 w-6" />} value="20,000+" label="Alumni Success Stories" />
-          <TrustBadge icon={<Award className="h-6 w-6" />} value="15+" label="Industry-Standard Modules" />
-          <TrustBadge icon={<ShieldCheck className="h-6 w-6" />} value="100%" label="Verified Certifications" />
-        </motion.div>
       </div>
     </section>
-  );
-}
-
-function TrustBadge({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="text-nipro-red">
-        {icon}
-      </div>
-      <div>
-        <div className="text-xl font-bold text-white">{value}</div>
-        <div className="text-[11px] text-white/60 uppercase tracking-wider font-medium">{label}</div>
-      </div>
-    </div>
   );
 }
