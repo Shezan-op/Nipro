@@ -1,5 +1,16 @@
 # Changelog
 
+## Phase 22: Database Cleanup & Faculty UI Polish (2026-06-05)
+
+### Database Fixes
+- **Discount Save Crash**: Dropped the `NOT NULL` constraint on the deprecated `percentage` column in the `discounts` table to fix a `23502` violation crashing the discount creation flow.
+- **Faculty DB Upgrade**: Added `type` text column (defaulting to `instructor`) to the `faculty` table to differentiate founders from regular instructors.
+
+### UI Upgrades
+- **Admin Sidebar**: Added the missing "Faculty" navigation link to `/admin/faculty` for easy access.
+- **Faculty Admin Dashboard**: Updated the faculty creation form to include a Dropdown/Select for `type` (Founder or Instructor).
+- **Faculty Frontend Redesign**: Extracted the faculty display logic into a new `FacultySection.tsx` client component. It now logically separates the Founder (prominent wide card) from Instructors (clean grid layout). Interactive bios are now cleanly concealed behind a minimal Modal/Dialog.
+
 ## Emergency Proxy Rollback (2026-05-29)
 
 ### Routing Fix

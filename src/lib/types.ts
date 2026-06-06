@@ -7,10 +7,15 @@ export interface Course {
   originalPrice?: number;
   shortDescription: string;
   description?: string;
+  long_description?: string;
   image?: string;
   mode: 'Online' | 'Offline' | 'Both';
   certification: boolean;
   status: 'Active' | 'Inactive';
+  rating?: string;
+  homepage_cta_text?: string;
+  detail_cta_text?: string;
+  show_on_homepage?: boolean;
 }
 
 export interface BlogPost {
@@ -51,17 +56,38 @@ export interface Discount {
   is_active: boolean;
   internal_note?: string;
   created_at?: string;
+  cta_text?: string;
+  cta_link?: string;
 }
 
 export interface Faculty {
   id: string;
   name: string;
+  type: 'founder' | 'instructor';
   role: string;
   bio?: string;
   image_url?: string;
   sort_order: number;
   is_active: boolean;
   created_at?: string;
+}
+
+export interface Testimonial {
+  id: string;
+  name: string;
+  role_course: string;
+  testimony: string;
+  image_url: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
+export interface GovtCertificate {
+  id: string;
+  title: string;
+  image_url: string;
+  is_active: boolean;
+  sort_order: number;
 }
 
 export interface SiteSettings {

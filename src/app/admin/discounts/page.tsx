@@ -13,6 +13,7 @@ import { Discount, Course } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { formatDateTime, formatDate } from '@/lib/utils';
 
 function formatDateForInput(dateStr?: string) {
   if (!dateStr) return '';
@@ -114,7 +115,9 @@ export default function AdminDiscounts() {
       starts_at: formatDateForInput(now.toISOString()),
       ends_at: formatDateForInput(end.toISOString()),
       is_active: true,
-      internal_note: ''
+      internal_note: '',
+      cta_text: 'Contact Us',
+      cta_link: ''
     });
     setIsFormOpen(true);
   };
@@ -200,6 +203,8 @@ export default function AdminDiscounts() {
         ends_at: new Date(formState.ends_at!).toISOString(),
         is_active: formState.is_active,
         internal_note: formState.internal_note || '',
+        cta_text: formState.cta_text || '',
+        cta_link: formState.cta_link || '',
       } as any;
 
       if (editingId) {
@@ -375,8 +380,8 @@ export default function AdminDiscounts() {
                             )}
                           </td>
                           <td className="px-5 py-4 text-xs text-slate-500">
-                            <div>{new Date(d.starts_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</div>
-                            <div>→ {new Date(d.ends_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</div>
+                            <div>{formatDateTime(d.starts_at)}</div>
+                            <div>→ {formatDateTime(d.ends_at)}</div>
                           </td>
                           <td className="px-5 py-4">
                             <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${
@@ -458,6 +463,28 @@ export default function AdminDiscounts() {
                         onChange={e => setFormState({...formState, internal_note: e.target.value})}
                         className="bg-slate-50"
                       />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">CTA Button Text</label>
+                      <Input 
+                        placeholder="e.g. Contact Us" 
+                        value={formState.cta_text || ''}
+                        onChange={e => setFormState({...formState, cta_text: e.target.value})}
+                        className="bg-slate-50"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">CTA Link (Optional)</label>
+                      <Input 
+                        placeholder="e.g. /contact or WhatsApp link" 
+                        value={formState.cta_link || ''}
+                        onChange={e => setFormState({...formState, cta_link: e.target.value})}
+                        className="bg-slate-50"
+                      />
+                      <div className="text-[10px] text-slate-400">Leave blank to use default WhatsApp</div>
                     </div>
                   </div>
                 </div>
@@ -678,7 +705,9 @@ export default function AdminDiscounts() {
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Header Top Bar</div>
                       <div className="bg-red-600 text-white p-2 rounded-md text-xs text-center font-semibold shadow-inner border border-red-700 flex justify-between items-center">
                         <span className="truncate flex-1 text-left px-2">{formState.title || 'Enter title...'}</span>
-                        <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] whitespace-nowrap">Chat →</span>
+                        <span className="bg-white text-red-600 px-3 py-1 rounded-full text-[10px] whitespace-nowrap font-bold">
+                          {formState.cta_text || 'Contact Us'}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -747,7 +776,7 @@ export default function AdminDiscounts() {
                   <div key={c.id} className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex justify-between items-center">
                     <div>
                       <div className="font-bold text-slate-900 text-sm">{c.title}</div>
-                      <div className="text-xs text-slate-500">{new Date(c.starts_at).toLocaleDateString()} to {new Date(c.ends_at).toLocaleDateString()}</div>
+                      <div className="text-xs text-slate-500">{formatDate(c.starts_at)} to {formatDate(c.ends_at)}</div>
                     </div>
                     <div className="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded">
                       {c.discount_type === 'percentage' ? `${c.discount_value}% OFF` : `₹${c.discount_value} OFF`}

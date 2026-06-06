@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import { MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SiteSettings, Discount } from '@/lib/data-service';
+import { SiteSettings } from '@/lib/data-service';
 
-export function Hero({ settings, discount }: { settings?: SiteSettings, discount?: Discount | null }) {
+export function Hero({ settings }: { settings?: SiteSettings }) {
   const whatsappUrl = `https://wa.me/${settings?.contact?.whatsapp?.replace(/\D/g, '') || settings?.contact?.phone?.replace(/\D/g, '') || '919000000000'}`;
 
   return (
@@ -43,11 +43,6 @@ export function Hero({ settings, discount }: { settings?: SiteSettings, discount
               className="text-[12px] text-neutral-500 font-medium mb-4 sm:mb-5 flex flex-wrap gap-2 items-center"
             >
               <span>Govt. Recognised · Since 2014 · Korutla, Telangana</span>
-              {discount && (
-                <span className="inline-flex items-center bg-nipro-red/20 text-nipro-red px-2 py-0.5 rounded-full font-bold text-[10px] tracking-widest uppercase border border-nipro-red/30">
-                  🎉 Special Enrollment Offer
-                </span>
-              )}
             </motion.p>
 
             <motion.h1

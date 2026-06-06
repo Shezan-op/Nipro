@@ -95,3 +95,8 @@ Nipro Computer Education is a modern web application built for an offline educat
 - **Secure the Auth Flow:** Store the Supabase session token in an `HttpOnly`, `Secure` cookie and set proper CSRF checks.
 - **Wire Up Contact Form:** Connect `/contact` submissions to an email service (Resend/SendGrid) or store them in a new `inquiries` Supabase table.
 - **Fix Blog IDs:** Switch from `Date.now()` to UUIDs for blog IDs.
+
+## Testimonials & Govt Certificates
+- Dynamic Testimonials Section mapping to `testimonials` table.
+- Dynamic Trust Gallery mapping to `govt_certificates` table.
+- Supabase storage integration with automated orphaned image cleanup on replace/delete.

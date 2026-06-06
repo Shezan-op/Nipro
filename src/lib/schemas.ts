@@ -13,6 +13,11 @@ export const CourseSchema = z.object({
   image: z.string().optional(),
   price: z.number().optional(),
   originalPrice: z.number().optional(),
+  rating: z.string().optional(),
+  homepage_cta_text: z.string().optional(),
+  detail_cta_text: z.string().optional(),
+  show_on_homepage: z.boolean().optional(),
+  long_description: z.string().optional(),
 });
 
 export const BlogPostSchema = z.object({
@@ -21,7 +26,7 @@ export const BlogPostSchema = z.object({
   coverImage: z.string().url("Please enter a valid image URL").or(z.literal("")),
   content: z.string().min(20, "Content must be at least 20 characters"),
   status: z.enum(["Published", "Draft"]),
-  createdAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  createdAt: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "Invalid date format (DD/MM/YYYY)"),
 });
 
 export const CertificateSchema = z.object({
@@ -29,7 +34,7 @@ export const CertificateSchema = z.object({
   fullName: z.string().min(3, "Student name must be at least 3 characters"),
   searchAlias: z.string().optional(),
   courseName: z.string().min(1, "Course name is required"),
-  issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  issueDate: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "Invalid date format (DD/MM/YYYY)"),
   imageUrl: z.string().optional(),
   pdfUrl: z.string().optional(),
   status: z.enum(["Active", "Inactive"]),

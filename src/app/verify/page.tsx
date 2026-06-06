@@ -23,6 +23,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getCertificate } from '@/lib/actions';
 import { Certificate } from '@/lib/data-service';
 import { motion } from 'framer-motion';
+import { formatDate } from '@/lib/utils';
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -184,7 +185,7 @@ function VerifyContent() {
                     <div className="space-y-4">
                       <DetailRow icon={User} label="Student Name" value={cert.fullName} />
                       <DetailRow icon={GraduationCap} label="Course" value={cert.courseName} />
-                      <DetailRow icon={Calendar} label="Issue Date" value={new Date(cert.issueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} />
+                      <DetailRow icon={Calendar} label="Issue Date" value={formatDate(cert.issueDate)} />
                       <DetailRow icon={Award} label="Certificate ID" value={`#${cert.id}`} isMono />
                     </div>
                     

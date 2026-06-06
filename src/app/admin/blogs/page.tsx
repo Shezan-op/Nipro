@@ -138,8 +138,8 @@ export default function AdminBlogs() {
       title: '',
       coverImage: '',
       content: '',
-      status: 'Draft',
-      createdAt: new Date().toISOString().split('T')[0]
+      status: 'Published',
+      createdAt: ''
     };
     setEditForm(newBlog);
     setEditingId(newBlog.id);
@@ -237,7 +237,10 @@ export default function AdminBlogs() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Date</label>
                 <Input 
-                  type="date"
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  pattern="\d{2}/\d{2}/\d{4}"
+                  title="Format: DD/MM/YYYY"
                   value={editForm.createdAt || ''}
                   onChange={e => setEditForm({...editForm, createdAt: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"

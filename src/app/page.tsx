@@ -4,7 +4,9 @@ import { PromotionalBanner } from "@/components/home/PromotionalBanner";
 import { PromoPopup } from "@/components/home/PromoPopup";
 import { TrustGallery } from "@/components/home/TrustGallery";
 import { BlogCard } from "@/components/home/BlogCard";
-import { getCourses, getBlogPosts, getSiteSettings, getDiscounts, getFaculty, BlogPost, SiteSettings, Discount, Faculty } from "@/lib/data-service";
+import { FacultySection } from "@/components/home/FacultySection";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
+import { getCourses, getBlogPosts, getSiteSettings, getDiscounts, getFaculty, getTestimonials, getGovtCertificates, BlogPost, SiteSettings, Discount, Faculty } from "@/lib/data-service";
 import { Laptop, ShieldCheck, Globe, ArrowRight, Sparkles, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -12,12 +14,14 @@ import Link from "next/link";
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [courses, blogs, settings, discountsData, faculty] = await Promise.all([
+  const [courses, blogs, settings, discountsData, faculty, testimonials, govtCertificates] = await Promise.all([
     getCourses(),
     getBlogPosts(),
     getSiteSettings(),
     getDiscounts(),
     getFaculty(),
+    getTestimonials(),
+    getGovtCertificates(),
   ]);
 
   // Filter only active discounts
@@ -30,16 +34,16 @@ export default async function Home() {
   const popupDiscount = getDiscountBySurface('popup');
   const softReminderDiscount = getDiscountBySurface('soft_reminder');
   
-  // Use the highest percentage "all" discount for the hero badge, or fallback
-  const heroDiscount = activeDiscounts.find(d => d.applies_to === 'all') || activeDiscounts[0] || null;
+
+  const whatsappUrl = `https://wa.me/${(settings as SiteSettings)?.contact?.whatsapp?.replace(/\D/g, '') || (settings as SiteSettings)?.contact?.phone?.replace(/\D/g, '')}`;
 
 
   return (
     <div className="flex flex-col">
-      {topBarDiscount && <PromotionalBanner discount={topBarDiscount} />}
+      {topBarDiscount && <PromotionalBanner discount={topBarDiscount} whatsappUrl={whatsappUrl} />}
       <PromoPopup discount={popupDiscount} settings={settings as SiteSettings} />
       
-      <Hero settings={settings as SiteSettings} discount={heroDiscount} />
+      <Hero settings={settings as SiteSettings} />
       
       {/* Alumni / Placement Strip */}
       <section className="bg-slate-50 border-b border-gray-200 py-8">
@@ -212,101 +216,10 @@ export default async function Home() {
         </div>
       </section>
 
-      <TrustGallery />
+      <TrustGallery certificates={govtCertificates} />
 
       {/* Outcome-Driven Testimonials */}
-      <section className="py-28 bg-slate-950 text-white relative overflow-hidden bg-grid-white-5">
-        {/* Decorative BG / Glows */}
-        <div className="absolute inset-0 opacity-15">
-           <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-nipro-red rounded-full blur-[150px]" />
-           <div className="absolute bottom-0 left-10 w-[300px] h-[300px] bg-blue-650 rounded-full blur-[120px]" />
-        </div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-sm font-bold text-red-400 uppercase tracking-widest mb-3">Real Outcomes</h2>
-            <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-4">
-              Don&apos;t just take our word for it
-            </h3>
-            <p className="text-slate-300 max-w-2xl mx-auto text-base sm:text-lg tracking-tight">
-              Our graduates are working in leading companies across India. Hear their stories.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="apple-material-dark apple-card-3xl p-8 flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
-              <div>
-                <div className="flex text-amber-400 mb-6">
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                </div>
-                <p className="text-slate-200 text-lg leading-relaxed mb-6 italic font-medium">
-                  &quot;Nipro completely transformed my career. The hands-on training with my own system gave me the confidence to crack my first technical interview at TCS.&quot;
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-nipro-red/20 flex items-center justify-center font-bold text-xl text-nipro-red">
-                  R
-                </div>
-                <div>
-                  <h4 className="font-bold text-white tracking-tight">Rahul Reddy</h4>
-                  <p className="text-sm text-slate-400">Placed at TCS • PGDCA Batch</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="apple-material-dark apple-card-3xl p-8 flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300">
-              <div>
-                <div className="flex text-amber-400 mb-6">
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                </div>
-                <p className="text-slate-200 text-lg leading-relaxed mb-6 italic font-medium">
-                  &quot;The government-recognized certificate helped me get a promotion in my current job. The instructors are extremely patient and knowledgeable.&quot;
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-nipro-blue/20 flex items-center justify-center font-bold text-xl text-blue-400">
-                  S
-                </div>
-                <div>
-                  <h4 className="font-bold text-white tracking-tight">Sneha Sharma</h4>
-                  <p className="text-sm text-slate-400">Govt. Employee • Tally ERP</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="apple-material-dark apple-card-3xl p-8 flex flex-col justify-between shadow-lg hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 md:col-span-2 lg:col-span-1">
-              <div>
-                <div className="flex text-amber-400 mb-6">
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                  <Sparkles className="w-5 h-5 fill-current" />
-                </div>
-                <p className="text-slate-200 text-lg leading-relaxed mb-6 italic font-medium">
-                  &quot;Learning in my native language made complex programming concepts easy to grasp. The projects we built were exactly what interviewers wanted to see.&quot;
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center font-bold text-xl text-emerald-400">
-                  M
-                </div>
-                <div>
-                  <h4 className="font-bold text-white tracking-tight">Mohammed Ali</h4>
-                  <p className="text-sm text-slate-400">Software Developer • Python Pro</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection testimonials={testimonials} />
 
       {/* Blog Section */}
       <section className="py-24 bg-white">
@@ -353,39 +266,7 @@ export default async function Home() {
       )}
 
       {/* Faculty Section */}
-      {faculty.length > 0 && (
-        <section className="py-24 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-sm font-bold text-nipro-red uppercase tracking-widest mb-3">Expert Mentors</h2>
-              <h3 className="text-3xl md:text-4xl font-extrabold text-nipro-blue tracking-tight mb-4">Learn From The Best</h3>
-              <p className="text-slate-600 max-w-2xl mx-auto">
-                Our instructors are industry professionals who bring real-world experience directly to the classroom.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {faculty.filter(f => f.is_active).map(f => (
-                <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center transition-transform hover:-translate-y-1 hover:shadow-md">
-                  <div className="w-24 h-24 mx-auto bg-slate-200 rounded-full overflow-hidden border-4 border-white shadow-sm mb-6">
-                    {f.image_url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={f.image_url} alt={f.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100 font-bold text-2xl">
-                        {f.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <h4 className="text-xl font-bold text-slate-900 mb-1">{f.name}</h4>
-                  <div className="text-sm font-bold text-nipro-red mb-4">{f.role}</div>
-                  <p className="text-slate-600 text-sm leading-relaxed">{f.bio}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <FacultySection faculty={faculty} />
 
       {/* Final CTA / WhatsApp Community */}
       <section className="py-24 bg-nipro-blue text-white relative overflow-hidden text-center">

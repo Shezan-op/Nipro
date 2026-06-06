@@ -29,7 +29,7 @@ export default function AdminCertificates() {
     id: '',
     fullName: '',
     courseName: '',
-    issueDate: new Date().toISOString().split('T')[0],
+    issueDate: '',
     joiningDate: '',
     completionDate: '',
     status: 'Active',
@@ -103,7 +103,7 @@ export default function AdminCertificates() {
           id: '',
           fullName: '',
           courseName: '',
-          issueDate: new Date().toISOString().split('T')[0],
+          issueDate: '',
           joiningDate: '',
           completionDate: '',
           status: 'Active',
@@ -249,7 +249,10 @@ export default function AdminCertificates() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Issue Date</label>
                 <Input 
-                  type="date"
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  pattern="\d{2}/\d{2}/\d{4}"
+                  title="Format: DD/MM/YYYY"
                   value={newCert.issueDate}
                   onChange={e => setNewCert({...newCert, issueDate: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
@@ -258,7 +261,10 @@ export default function AdminCertificates() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Joining Date <span className="text-gray-400 font-normal normal-case">(optional)</span></label>
                 <Input 
-                  type="date"
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  pattern="\d{2}/\d{2}/\d{4}"
+                  title="Format: DD/MM/YYYY"
                   value={newCert.joiningDate || ''}
                   onChange={e => setNewCert({...newCert, joiningDate: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
@@ -267,7 +273,10 @@ export default function AdminCertificates() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Completion Date <span className="text-gray-400 font-normal normal-case">(optional)</span></label>
                 <Input 
-                  type="date"
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  pattern="\d{2}/\d{2}/\d{4}"
+                  title="Format: DD/MM/YYYY"
                   value={newCert.completionDate || ''}
                   onChange={e => setNewCert({...newCert, completionDate: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
@@ -351,7 +360,10 @@ export default function AdminCertificates() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Issue Date</label>
                 <Input 
-                  type="date"
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  pattern="\d{2}/\d{2}/\d{4}"
+                  title="Format: DD/MM/YYYY"
                   value={editingCert.issueDate}
                   onChange={e => setEditingCert({...editingCert, issueDate: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
@@ -360,7 +372,10 @@ export default function AdminCertificates() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Joining Date <span className="text-gray-400 font-normal normal-case">(optional)</span></label>
                 <Input 
-                  type="date"
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  pattern="\d{2}/\d{2}/\d{4}"
+                  title="Format: DD/MM/YYYY"
                   value={editingCert.joiningDate || ''}
                   onChange={e => setEditingCert({...editingCert, joiningDate: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"
@@ -369,7 +384,10 @@ export default function AdminCertificates() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Completion Date <span className="text-gray-400 font-normal normal-case">(optional)</span></label>
                 <Input 
-                  type="date"
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  pattern="\d{2}/\d{2}/\d{4}"
+                  title="Format: DD/MM/YYYY"
                   value={editingCert.completionDate || ''}
                   onChange={e => setEditingCert({...editingCert, completionDate: e.target.value})}
                   className="h-12 border-gray-200 focus-visible:ring-nipro-red"

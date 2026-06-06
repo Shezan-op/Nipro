@@ -3,23 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Loader2, Save, X, Image as ImageIcon, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  getFacultyAction, addFacultyAction, deleteFacultyAction, updateFacultyAction, uploadFileAction 
+  getTestimonialsAction, createTestimonialAction, deleteTestimonialAction, updateTestimonialAction, uploadFileAction 
 } from '@/lib/actions';
-import { Faculty } from '@/lib/types';
+import { Testimonial } from '@/lib/types';
 
-export default function AdminFaculty() {
-  const [facultyList, setFacultyList] = useState<Faculty[]>([]);
+export default function AdminTestimonials() {
+  const [list, setList] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formState, setFormState] = useState<Partial<Faculty>>({});
+  const [formState, setFormState] = useState<Partial<Testimonial>>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -29,14 +29,16 @@ export default function AdminFaculty() {
 
   async function loadData() {
     setLoading(true);
-    const data = await getFacultyAction();
-    setFacultyList(data);
+    const res = await getTestimonialsAction();
+    if (res.success && res.data) {
+      setList(res.data);
+    }
     setLoading(false);
   }
 
-  const handleEdit = (f: Faculty) => {
-    setEditingId(f.id);
-    setFormState({ ...f });
+  const handleEdit = (item: Testimonial) => {
+    setEditingId(item.id);
+    setFormState({ ...item });
     setSelectedFile(null);
     setIsFormOpen(true);
   };
@@ -45,11 +47,10 @@ export default function AdminFaculty() {
     setEditingId(null);
     setFormState({
       name: '',
-      type: 'instructor',
-      role: '',
-      bio: '',
+      role_course: '',
+      testimony: '',
       image_url: '',
-      sort_order: facultyList.length,
+      sort_order: list.length,
       is_active: true
     });
     setSelectedFile(null);
@@ -64,16 +65,16 @@ export default function AdminFaculty() {
   };
 
   const handleToggleActive = async (id: string, current: boolean) => {
-    await updateFacultyAction(id, { is_active: !current });
-    toast.success(current ? 'Faculty hidden' : 'Faculty active');
+    await updateTestimonialAction(id, { is_active: !current });
+    toast.success(current ? 'Testimonial hidden' : 'Testimonial active');
     loadData();
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this faculty member?')) return;
-    const res = await deleteFacultyAction(id);
+    if (!confirm('Are you sure you want to delete this testimonial?')) return;
+    const res = await deleteTestimonialAction(id);
     if (res.success) {
-      toast.success('Faculty deleted');
+      toast.success('Testimonial deleted');
       loadData();
     } else {
       toast.error('Failed to delete');
@@ -92,8 +93,8 @@ export default function AdminFaculty() {
   };
 
   const handleSaveClick = async () => {
-    if (!formState.name || !formState.role) {
-      toast.error('Name and Role are required');
+    if (!formState.name || !formState.role_course || !formState.testimony) {
+      toast.error('Name, Role/Course, and Testimony are required');
       return;
     }
 
@@ -105,7 +106,7 @@ export default function AdminFaculty() {
         setUploadingImage(true);
         const formData = new FormData();
         formData.append('file', selectedFile);
-        const uploadRes = await uploadFileAction('faculty_images', selectedFile.name, formData);
+        const uploadRes = await uploadFileAction('testimonial_images', selectedFile.name, formData);
         setUploadingImage(false);
         
         if (uploadRes.success && uploadRes.url) {
@@ -119,25 +120,24 @@ export default function AdminFaculty() {
 
       const payload = {
         name: formState.name,
-        type: formState.type || 'instructor',
-        role: formState.role,
-        bio: formState.bio || '',
+        role_course: formState.role_course,
+        testimony: formState.testimony,
         image_url: finalImageUrl || '',
         sort_order: formState.sort_order || 0,
         is_active: formState.is_active !== false,
-      } as any;
+      };
 
       if (editingId) {
-        await updateFacultyAction(editingId, payload);
-        toast.success('Faculty updated');
+        await updateTestimonialAction(editingId, payload);
+        toast.success('Testimonial updated');
       } else {
-        await addFacultyAction(payload);
-        toast.success('Faculty added');
+        await createTestimonialAction(payload);
+        toast.success('Testimonial added');
       }
       closeForm();
       loadData();
     } catch (e) {
-      toast.error('Error saving faculty');
+      toast.error('Error saving testimonial');
     } finally {
       setSaving(false);
     }
@@ -150,11 +150,11 @@ export default function AdminFaculty() {
         <>
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Faculty & Mentors</h1>
-              <p className="text-sm text-slate-500 mt-1">Manage the profiles shown in the founder & faculty section.</p>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Testimonials</h1>
+              <p className="text-sm text-slate-500 mt-1">Manage student reviews shown on the homepage.</p>
             </div>
             <Button onClick={startAdding} className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-10 px-6 rounded-lg shadow-sm">
-              <Plus className="mr-2 w-4 h-4" /> Add Faculty
+              <Plus className="mr-2 w-4 h-4" /> Add Testimonial
             </Button>
           </div>
 
@@ -175,54 +175,55 @@ export default function AdminFaculty() {
                     <tr>
                       <td colSpan={5} className="px-5 py-12 text-center text-slate-500">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" />
-                        Loading faculty...
+                        Loading testimonials...
                       </td>
                     </tr>
-                  ) : facultyList.length === 0 ? (
+                  ) : list.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-5 py-12 text-center text-slate-500">
-                        <div className="text-3xl mb-2">🎓</div>
-                        <div className="font-semibold text-slate-700">No faculty members found</div>
-                        <div className="text-xs">Add your founder and mentors to show them on the homepage.</div>
+                        <div className="font-semibold text-slate-700">No testimonials found</div>
+                        <div className="text-xs">Add student reviews to show them on the homepage.</div>
                       </td>
                     </tr>
                   ) : (
-                    facultyList.map(f => (
-                      <tr key={f.id} className="hover:bg-slate-50 transition-colors">
+                    list.map(t => (
+                      <tr key={t.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-5 py-4 text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <GripVertical className="w-4 h-4 text-slate-300 cursor-move" />
-                            <span className="font-bold text-slate-500">{f.sort_order}</span>
+                            <span className="font-bold text-slate-500">{t.sort_order}</span>
                           </div>
                         </td>
                         <td className="px-5 py-4">
                           <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
-                            {f.image_url ? (
-                              <img src={f.image_url} alt={f.name} className="w-full h-full object-cover" />
+                            {t.image_url ? (
+                              <img src={t.image_url} alt={t.name} className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                              <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-200">
                                 <ImageIcon className="w-5 h-5" />
                               </div>
                             )}
                           </div>
                         </td>
-                        <td className="px-5 py-4 min-w-[200px] whitespace-normal">
-                          <div className="font-bold text-slate-900">{f.name}</div>
-                          <div className="text-xs font-semibold text-red-600 mb-1">{f.role}</div>
-                          <div className="text-xs text-slate-500 line-clamp-1">{f.bio}</div>
+                        <td className="px-5 py-4">
+                          <div className="font-bold text-slate-900">{t.name}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">{t.role_course}</div>
                         </td>
                         <td className="px-5 py-4">
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" checked={f.is_active} onChange={() => handleToggleActive(f.id, f.is_active)} />
-                            <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
-                          </label>
+                          <button
+                            onClick={() => handleToggleActive(t.id, t.is_active)}
+                            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                              t.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                            }`}
+                          >
+                            {t.is_active ? 'Active' : 'Hidden'}
+                          </button>
                         </td>
                         <td className="px-5 py-4 text-right">
                           <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900" onClick={() => handleEdit(f)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900" onClick={() => handleEdit(t)}>
                               <Edit2 className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleDelete(f.id)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleDelete(t.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -239,11 +240,11 @@ export default function AdminFaculty() {
         <>
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{editingId ? 'Edit Faculty' : 'Add Faculty'}</h1>
-              <p className="text-sm text-slate-500 mt-1">Profile details will appear on the homepage.</p>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{editingId ? 'Edit Testimonial' : 'Add Testimonial'}</h1>
+              <p className="text-sm text-slate-500 mt-1">Review details will appear on the homepage.</p>
             </div>
             <Button variant="outline" onClick={closeForm} className="h-9 font-semibold text-slate-600">
-              ← Back
+              Back
             </Button>
           </div>
 
@@ -262,31 +263,20 @@ export default function AdminFaculty() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-900">Type *</label>
-                    <select
-                      value={formState.type || 'instructor'}
-                      onChange={e => setFormState({...formState, type: e.target.value as any})}
-                      className="flex h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-                    >
-                      <option value="instructor">Instructor</option>
-                      <option value="founder">Founder</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-900">Role / Title *</label>
+                    <label className="text-sm font-semibold text-slate-900">Role / Course *</label>
                     <Input 
-                      placeholder="e.g. Founder & Lead Instructor" 
-                      value={formState.role || ''}
-                      onChange={e => setFormState({...formState, role: e.target.value})}
+                      placeholder="e.g. Student - Tally Prime" 
+                      value={formState.role_course || ''}
+                      onChange={e => setFormState({...formState, role_course: e.target.value})}
                       className="bg-slate-50"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-900">Bio</label>
+                    <label className="text-sm font-semibold text-slate-900">Testimony *</label>
                     <Textarea 
-                      placeholder="Brief description about the mentor..." 
-                      value={formState.bio || ''}
-                      onChange={e => setFormState({...formState, bio: e.target.value})}
+                      placeholder="Review text..." 
+                      value={formState.testimony || ''}
+                      onChange={e => setFormState({...formState, testimony: e.target.value})}
                       className="bg-slate-50 min-h-[100px]"
                     />
                   </div>
@@ -298,7 +288,6 @@ export default function AdminFaculty() {
                       onChange={e => setFormState({...formState, sort_order: parseInt(e.target.value) || 0})}
                       className="bg-slate-50"
                     />
-                    <div className="text-[11px] text-slate-500">Lower numbers appear first (e.g. 0 for Founder)</div>
                   </div>
                 </div>
 
@@ -324,14 +313,13 @@ export default function AdminFaculty() {
                         Choose Image
                         <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                       </label>
-                      <div className="text-[11px] text-slate-400 mt-2">JPEG, PNG, WebP (Max 5MB). Square aspect ratio recommended.</div>
                     </div>
                   </div>
 
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
                     <div>
                       <div className="font-bold text-sm text-slate-900">Active Status</div>
-                      <div className="text-[11px] text-slate-500">Toggle to hide this profile.</div>
+                      <div className="text-[11px] text-slate-500">Toggle to hide this review.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={formState.is_active !== false} onChange={e => setFormState({...formState, is_active: e.target.checked})} />
@@ -346,7 +334,7 @@ export default function AdminFaculty() {
               <Button variant="outline" onClick={closeForm} disabled={saving} className="bg-white">Cancel</Button>
               <Button onClick={handleSaveClick} disabled={saving} className="bg-slate-900 hover:bg-slate-800 font-bold text-white shadow-sm px-8">
                 {(saving || uploadingImage) ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-                {uploadingImage ? 'Uploading...' : 'Save Faculty'}
+                {uploadingImage ? 'Uploading...' : 'Save Testimonial'}
               </Button>
             </div>
           </Card>

@@ -1,174 +1,187 @@
 import React from 'react';
-import { getCourseById } from '@/lib/data-service';
+import { getCourseById, getSiteSettings, SiteSettings, getDiscounts } from '@/lib/data-service';
 import { notFound } from 'next/navigation';
-import { Clock, Globe, ShieldCheck, CheckCircle2, ChevronLeft, Phone, Tag, Calendar, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Clock, MonitorPlay, Award, ArrowLeft, CheckCircle2, Star } from 'lucide-react';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
-interface PageProps {
-  params: { id: string };
-}
-
-export default async function CourseDetailPage({ params }: PageProps) {
+export default async function CourseDetailPage({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const course = await getCourseById(id);
+  const [course, settings, discounts] = await Promise.all([
+    getCourseById(id),
+    getSiteSettings(),
+    getDiscounts()
+  ]);
 
   if (!course) {
     notFound();
   }
 
+  const activeDiscounts = discounts.filter(d => d.is_active && new Date(d.starts_at) <= new Date() && new Date(d.ends_at) >= new Date());
+  
+  // Find applicable discount
+  let finalPrice = course.price;
+  let activeDiscount = null;
+  
+  if (course.price) {
+    activeDiscount = activeDiscounts.find(d => 
+      (d.applies_to === 'all' || (d.applies_to === 'selected' && d.course_ids.includes(course.id))) && 
+      course.price! >= d.min_floor_price
+    );
+
+    if (activeDiscount) {
+      if (activeDiscount.discount_type === 'percentage') {
+        finalPrice = course.price - (course.price * (activeDiscount.discount_value / 100));
+      } else if (activeDiscount.discount_type === 'flat') {
+        finalPrice = Math.max(0, course.price - activeDiscount.discount_value);
+      } else if (activeDiscount.discount_type === 'fixed') {
+        finalPrice = activeDiscount.discount_value;
+      }
+    }
+  }
+
+  const whatsappUrl = `https://wa.me/${(settings as SiteSettings)?.contact?.whatsapp?.replace(/\D/g, '') || (settings as SiteSettings)?.contact?.phone?.replace(/\D/g, '')}?text=Hi,%20I'm%20interested%20in%20the%20${encodeURIComponent(course.name)}%20course.`;
+
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <Link href="/courses" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-nipro-red mb-8 transition-colors">
-          <ChevronLeft className="mr-1 h-4 w-4" />
-          Back to all courses
+    <div className="bg-[#FAFAFB] min-h-screen">
+      {/* Header / Breadcrumb */}
+      <div className="container mx-auto px-4 py-4 md:py-6">
+        <Link href="/courses" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-nipro-blue transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Courses
         </Link>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8">
-            <div className="mb-8">
-              <div className="inline-block px-4 py-1 bg-nipro-red/10 text-nipro-red text-xs font-bold uppercase tracking-widest rounded-full mb-4">
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 md:px-6 mb-16">
+        <div className="bg-white rounded-[2rem] border border-black/[0.04] shadow-sm overflow-hidden flex flex-col lg:flex-row">
+          <div className="p-8 md:p-12 lg:w-[60%] flex flex-col justify-center">
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <span className="inline-block bg-nipro-blue/10 text-nipro-blue px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase">
                 {course.category}
+              </span>
+              {course.rating && (
+                <span className="inline-flex items-center bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-bold tracking-tight">
+                  <Star className="w-3.5 h-3.5 mr-1 fill-amber-500 text-amber-500" />
+                  {course.rating} Rating
+                </span>
+              )}
+            </div>
+            
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-950 mb-6 tracking-tight leading-[1.1]">
+              {course.name}
+            </h1>
+            
+            <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl">
+              {course.description || course.shortDescription}
+            </p>
+
+            <div className="flex flex-wrap gap-6 mb-10">
+              <div className="flex items-center text-slate-700 font-medium">
+                <Clock className="w-5 h-5 text-nipro-red mr-3" />
+                {course.duration}
               </div>
-              <h1 className="text-4xl font-extrabold text-nipro-blue sm:text-5xl mb-6">
-                {course.name}
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                {course.shortDescription}
-              </p>
+              <div className="flex items-center text-slate-700 font-medium">
+                <MonitorPlay className="w-5 h-5 text-nipro-red mr-3" />
+                {course.mode} Learning
+              </div>
+              {course.certification && (
+                <div className="flex items-center text-slate-700 font-medium">
+                  <Award className="w-5 h-5 text-nipro-red mr-3" />
+                  Govt. Certificate
+                </div>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                <Clock className="h-6 w-6 text-nipro-red mb-4" />
-                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Duration</div>
-                <div className="text-lg font-bold text-nipro-blue">{course.duration}</div>
-              </div>
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                <Globe className="h-6 w-6 text-nipro-red mb-4" />
-                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Learning Mode</div>
-                <div className="text-lg font-bold text-nipro-blue">{course.mode}</div>
-              </div>
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                <ShieldCheck className="h-6 w-6 text-nipro-red mb-4" />
-                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Certification</div>
-                <div className="text-lg font-bold text-nipro-blue">{course.certification ? 'Included' : 'On Request'}</div>
-              </div>
-            </div>
-
-            <div className="prose prose-blue max-w-none mb-12">
-              <h2 className="text-2xl font-bold text-nipro-blue mb-6">Course Curriculum Overview</h2>
-              <div className="space-y-4">
-                {[
-                  "Fundamentals and concepts",
-                  "Hands-on practical sessions",
-                  "Industry standard best practices",
-                  "Real-world project implementation",
-                  "Examination and Assessment"
-                ].map((item, index) => (
-                  <div key={index} className="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-xl hover:border-nipro-red/20 transition-colors">
-                    <div className="h-6 w-6 rounded-full bg-nipro-red/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle2 className="h-4 w-4 text-nipro-red" />
-                    </div>
-                    <span className="text-muted-foreground font-medium">{item}</span>
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div>
+                {course.price ? (
+                  <div className="flex items-end gap-3">
+                    <span className="text-3xl font-extrabold text-slate-950">₹{finalPrice?.toLocaleString('en-IN')}</span>
+                    {activeDiscount && (
+                      <span className="text-lg text-slate-400 line-through font-medium mb-1">
+                        ₹{course.price.toLocaleString('en-IN')}
+                      </span>
+                    )}
+                    {(!activeDiscount && course.originalPrice && course.originalPrice > course.price) && (
+                      <span className="text-lg text-slate-400 line-through font-medium mb-1">
+                        ₹{course.originalPrice.toLocaleString('en-IN')}
+                      </span>
+                    )}
                   </div>
-                ))}
+                ) : (
+                  <span className="text-2xl font-extrabold text-slate-950">Price varies</span>
+                )}
+                {activeDiscount && (
+                  <div className="text-xs font-bold text-green-600 mt-1 uppercase tracking-wider">
+                    {activeDiscount.title} Applied
+                  </div>
+                )}
               </div>
+              <Button asChild className="bg-nipro-red hover:bg-nipro-red/90 text-white h-12 px-8 rounded-full font-bold text-sm w-full sm:w-auto shadow-sm transition-all duration-300">
+                <Link href={whatsappUrl} target="_blank">
+                  {course.detail_cta_text || 'Enroll Now'}
+                </Link>
+              </Button>
             </div>
           </div>
-
-          <div className="lg:col-span-4">
-            <div className="sticky top-32 space-y-6">
-              <div className="bg-gradient-to-br from-nipro-blue via-nipro-blue to-nipro-red/90 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden border border-white/10 backdrop-blur-md">
-                {/* Background decorative elements */}
-                <div className="absolute -top-10 -right-10 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-                <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-nipro-red/20 rounded-full blur-xl" />
-
-                <h3 className="text-xl font-bold mb-6 relative z-10">Enrollment Details</h3>
-                <div className="space-y-6 mb-8 relative z-10">
-                  <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                      <Tag className="h-4 w-4 text-blue-200" />
-                      <span className="text-blue-200 text-sm">Course Fee</span>
-                    </div>
-                    <div className="text-right">
-                      {course.originalPrice && course.price && course.originalPrice > course.price ? (
-                        <>
-                          <div className="text-xs text-blue-300 line-through opacity-60">₹{course.originalPrice.toLocaleString()}/-</div>
-                          <div className="text-2xl font-black text-white">₹{course.price.toLocaleString()}/-</div>
-                        </>
-                      ) : (
-                        <div className="text-2xl font-black text-white">
-                          {course.price ? `₹${course.price.toLocaleString()}/-` : 'Price on Request'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-blue-200" />
-                      <span className="text-blue-200 text-sm">Status</span>
-                    </div>
-                    <span className="font-bold text-green-400">Open</span>
-                  </div>
-
-                  <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-200" />
-                      <span className="text-blue-200 text-sm">Next Batch</span>
-                    </div>
-                    <span className="font-bold">Monday, Next Week</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="h-4 w-4 text-blue-200" />
-                      <span className="text-blue-200 text-sm">Course Type</span>
-                    </div>
-                    <span className="font-bold">Job-Ready</span>
-                  </div>
+          
+          {/* Image Side */}
+          <div className="lg:w-[40%] bg-slate-100 relative min-h-[300px] lg:min-h-auto flex items-center justify-center p-8">
+            {course.image ? (
+              <img 
+                src={course.image} 
+                alt={course.name} 
+                className="w-full h-full object-cover absolute inset-0"
+              />
+            ) : (
+              <div className="text-center z-10">
+                <div className="w-20 h-20 bg-white shadow-sm rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MonitorPlay className="w-10 h-10 text-nipro-blue" />
                 </div>
-                
-                <div className="space-y-3 relative z-10">
-                  <Button asChild className="w-full h-14 bg-nipro-red hover:bg-nipro-red/90 font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95">
-                    <Link href="/contact">Enroll Now</Link>
-                  </Button>
-                  <Button asChild variant="outline" className="w-full h-14 bg-transparent border-2 border-white/20 hover:bg-white/10 font-bold text-lg rounded-xl transition-all active:scale-95">
-                    <a href="tel:+919000000000">
-                      <Phone className="mr-2 h-5 w-5" />
-                      Enquire via Phone
-                    </a>
-                  </Button>
-                </div>
-                
-                <p className="mt-6 text-center text-xs text-blue-300 relative z-10">
-                  Prefer messaging? <Link href="https://wa.me/919000000000" className="text-white font-bold underline">WhatsApp us</Link>
-                </p>
+                <h3 className="text-lg font-bold text-slate-400">NIPRO COURSE</h3>
               </div>
-
-              <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
-                <h4 className="font-bold text-nipro-blue mb-4">Location Info</h4>
-                <div className="flex gap-4 items-start mb-6">
-                   <div className="p-3 bg-white rounded-xl shadow-sm">
-                      <Globe className="h-5 w-5 text-nipro-red" />
-                   </div>
-                   <div className="text-sm">
-                      <div className="font-bold text-nipro-blue">Main Campus</div>
-                      <div className="text-muted-foreground">Korutla, Jagtial, Telangana</div>
-                   </div>
-                </div>
-                <Link href="/contact" className="text-sm font-bold text-nipro-red hover:underline">
-                  Get directions on map
-                </Link>
-              </div>
-            </div>
+            )}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Course Details Content */}
+      <section className="container mx-auto px-4 md:px-6 pb-24">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-extrabold text-slate-950 mb-6 tracking-tight">Course Overview</h2>
+          <div className="bg-white rounded-3xl p-8 md:p-12 border border-black/[0.04] shadow-sm">
+            {course.long_description ? (
+              <div className="prose prose-slate prose-lg max-w-none prose-headings:font-extrabold prose-a:text-nipro-blue prose-img:rounded-xl">
+                <div dangerouslySetInnerHTML={{ __html: course.long_description.replace(/\n/g, '<br/>') }} />
+              </div>
+            ) : (
+              <div className="text-slate-600 leading-relaxed text-lg">
+                <p className="mb-6">{course.description || course.shortDescription}</p>
+                <div className="space-y-4 mt-8">
+                  <h3 className="font-bold text-slate-900 text-xl">What you'll learn:</h3>
+                  <ul className="space-y-3">
+                    {[
+                      'Comprehensive understanding of core concepts',
+                      'Hands-on practical assignments and projects',
+                      'Industry-standard tools and workflows',
+                      'Preparation for real-world scenarios'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start">
+                        <CheckCircle2 className="w-5 h-5 text-green-500 mr-3 shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

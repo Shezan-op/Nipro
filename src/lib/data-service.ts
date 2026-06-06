@@ -1,5 +1,5 @@
-export type { Course, BlogPost, Certificate, SiteSettings, Discount, Faculty } from './types';
-import { Course, BlogPost, Certificate, SiteSettings, Discount, Faculty } from './types';
+export type { Course, BlogPost, Certificate, SiteSettings, Discount, Faculty, Testimonial, GovtCertificate } from './types';
+import { Course, BlogPost, Certificate, SiteSettings, Discount, Faculty, Testimonial, GovtCertificate } from './types';
 import { getSupabaseClient } from './supabase';
 
 // Certificate Functions
@@ -82,6 +82,19 @@ export async function addCertificate(cert: Certificate): Promise<void> {
 
 export async function updateCertificate(id: string, cert: Partial<Certificate>): Promise<void> {
   const supabase = await getSupabaseClient();
+  
+  if (cert.imageUrl || cert.pdfUrl) {
+    const existing = await getCertificateById(id);
+    if (existing) {
+      if (cert.imageUrl && existing.imageUrl && cert.imageUrl !== existing.imageUrl) {
+        await deleteStorageFile('certificate_images', existing.imageUrl);
+      }
+      if (cert.pdfUrl && existing.pdfUrl && cert.pdfUrl !== existing.pdfUrl) {
+        await deleteStorageFile('certificate_pdfs', existing.pdfUrl);
+      }
+    }
+  }
+
   const { error } = await supabase
     .from('certificates')
     .update({
@@ -101,6 +114,7 @@ export async function updateCertificate(id: string, cert: Partial<Certificate>):
 }
 
 export async function deleteCertificate(id: string): Promise<void> {
+  const existing = await getCertificateById(id);
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase
     .from('certificates')
@@ -112,6 +126,9 @@ export async function deleteCertificate(id: string): Promise<void> {
   if (!data || data.length === 0) {
     throw new Error(`Certificate "${id}" was not deleted. This may be a permissions issue — try logging out and back in.`);
   }
+  
+  if (existing?.imageUrl) await deleteStorageFile('certificate_images', existing.imageUrl);
+  if (existing?.pdfUrl) await deleteStorageFile('certificate_pdfs', existing.pdfUrl);
 }
 
 // ─── Course Functions (Single-Item Mutations) ───────────────────────────────
@@ -140,7 +157,12 @@ export async function getCourses(): Promise<Course[]> {
     image: course.image,
     mode: course.mode as 'Online' | 'Offline' | 'Both',
     certification: course.certification,
-    status: course.status as 'Active' | 'Inactive'
+    status: course.status as 'Active' | 'Inactive',
+    rating: course.rating,
+    homepage_cta_text: course.homepage_cta_text,
+    detail_cta_text: course.detail_cta_text,
+    show_on_homepage: course.show_on_homepage,
+    long_description: course.long_description
   }));
 }
 
@@ -170,7 +192,12 @@ export async function getCourseById(id: string): Promise<Course | null> {
     image: data.image,
     mode: data.mode as 'Online' | 'Offline' | 'Both',
     certification: data.certification,
-    status: data.status as 'Active' | 'Inactive'
+    status: data.status as 'Active' | 'Inactive',
+    rating: data.rating,
+    homepage_cta_text: data.homepage_cta_text,
+    detail_cta_text: data.detail_cta_text,
+    show_on_homepage: data.show_on_homepage,
+    long_description: data.long_description
   };
 }
 
@@ -208,7 +235,12 @@ export async function createCourse(course: Course): Promise<void> {
       image: course.image,
       mode: course.mode,
       certification: course.certification,
-      status: course.status
+      status: course.status,
+      rating: course.rating,
+      homepage_cta_text: course.homepage_cta_text,
+      detail_cta_text: course.detail_cta_text,
+      show_on_homepage: course.show_on_homepage,
+      long_description: course.long_description
     }]);
 
   if (error) throw error;
@@ -216,6 +248,13 @@ export async function createCourse(course: Course): Promise<void> {
 
 export async function updateCourse(id: string, course: Partial<Course>): Promise<void> {
   const supabase = await getSupabaseClient();
+  if (course.image) {
+    const existing = await getCourseById(id);
+    if (existing?.image && course.image !== existing.image) {
+      await deleteStorageFile('course_images', existing.image);
+    }
+  }
+
   const updateData: Record<string, unknown> = {};
   if (course.name !== undefined) updateData.name = course.name;
   if (course.category !== undefined) updateData.category = course.category;
@@ -228,6 +267,11 @@ export async function updateCourse(id: string, course: Partial<Course>): Promise
   if (course.mode !== undefined) updateData.mode = course.mode;
   if (course.certification !== undefined) updateData.certification = course.certification;
   if (course.status !== undefined) updateData.status = course.status;
+  if (course.rating !== undefined) updateData.rating = course.rating;
+  if (course.homepage_cta_text !== undefined) updateData.homepage_cta_text = course.homepage_cta_text;
+  if (course.detail_cta_text !== undefined) updateData.detail_cta_text = course.detail_cta_text;
+  if (course.show_on_homepage !== undefined) updateData.show_on_homepage = course.show_on_homepage;
+  if (course.long_description !== undefined) updateData.long_description = course.long_description;
 
   const { error } = await supabase
     .from('courses')
@@ -238,6 +282,7 @@ export async function updateCourse(id: string, course: Partial<Course>): Promise
 }
 
 export async function deleteCourse(id: string): Promise<void> {
+  const existing = await getCourseById(id);
   const supabase = await getSupabaseClient();
   const { error } = await supabase
     .from('courses')
@@ -245,6 +290,10 @@ export async function deleteCourse(id: string): Promise<void> {
     .eq('id', id);
 
   if (error) throw error;
+  
+  if (existing?.image) {
+    await deleteStorageFile('course_images', existing.image);
+  }
 }
 
 // ─── Blog Functions (Single-Item Mutations) ──────────────────────────────────
@@ -320,6 +369,13 @@ export async function createBlog(blog: BlogPost): Promise<void> {
 
 export async function updateBlog(id: string, blog: Partial<BlogPost>): Promise<void> {
   const supabase = await getSupabaseClient();
+  if (blog.coverImage) {
+    const existing = await getBlogPostById(id);
+    if (existing?.coverImage && blog.coverImage !== existing.coverImage) {
+      await deleteStorageFile('blog_images', existing.coverImage);
+    }
+  }
+
   const updateData: Record<string, unknown> = {};
   if (blog.title !== undefined) updateData.title = blog.title;
   if (blog.coverImage !== undefined) updateData.cover_image = blog.coverImage;
@@ -335,6 +391,7 @@ export async function updateBlog(id: string, blog: Partial<BlogPost>): Promise<v
 }
 
 export async function deleteBlog(id: string): Promise<void> {
+  const existing = await getBlogPostById(id);
   const supabase = await getSupabaseClient();
   const { error } = await supabase
     .from('blogs')
@@ -342,6 +399,10 @@ export async function deleteBlog(id: string): Promise<void> {
     .eq('id', id);
 
   if (error) throw error;
+  
+  if (existing?.coverImage) {
+    await deleteStorageFile('blog_images', existing.coverImage);
+  }
 }
 
 // ─── Discount Functions (Single-Item Mutations) ─────────────────────────────
@@ -395,7 +456,9 @@ export async function createDiscount(discount: Omit<Discount, 'id'>): Promise<vo
       starts_at: discount.starts_at,
       ends_at: discount.ends_at,
       is_active: discount.is_active,
-      internal_note: discount.internal_note
+      internal_note: discount.internal_note,
+      cta_text: discount.cta_text,
+      cta_link: discount.cta_link
     }]);
 
   if (error) throw error;
@@ -417,6 +480,8 @@ export async function updateDiscount(id: string, discount: Partial<Discount>): P
   if (discount.ends_at !== undefined) updateData.ends_at = discount.ends_at;
   if (discount.is_active !== undefined) updateData.is_active = discount.is_active;
   if (discount.internal_note !== undefined) updateData.internal_note = discount.internal_note;
+  if (discount.cta_text !== undefined) updateData.cta_text = discount.cta_text;
+  if (discount.cta_link !== undefined) updateData.cta_link = discount.cta_link;
 
   const { error } = await supabase
     .from('discounts')
@@ -465,6 +530,14 @@ export async function createFaculty(faculty: Omit<Faculty, 'id' | 'created_at'>)
 
 export async function updateFaculty(id: string, faculty: Partial<Faculty>): Promise<void> {
   const supabase = await getSupabaseClient();
+  if (faculty.image_url) {
+    const existingList = await getFaculty();
+    const existing = existingList.find(f => f.id === id);
+    if (existing?.image_url && faculty.image_url !== existing.image_url) {
+      await deleteStorageFile('faculty_images', existing.image_url);
+    }
+  }
+
   const { error } = await supabase
     .from('faculty')
     .update(faculty)
@@ -528,9 +601,121 @@ export async function saveSettings(settings: SiteSettings): Promise<void> {
   }
 }
 
+
+// ─── Testimonials ────────────────────────────────────────────────────────────
+
+export async function getTestimonials(): Promise<Testimonial[]> {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from('testimonials')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching testimonials:', error);
+    return [];
+  }
+  return data as Testimonial[];
+}
+
+export async function createTestimonial(t: Omit<Testimonial, 'id' | 'created_at'>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase.from('testimonials').insert([t]);
+  if (error) throw error;
+}
+
+export async function updateTestimonial(id: string, t: Partial<Testimonial>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  if (t.image_url) {
+    const all = await getTestimonials();
+    const existing = all.find(x => x.id === id);
+    if (existing?.image_url && t.image_url !== existing.image_url) {
+      await deleteStorageFile('testimonial_images', existing.image_url);
+    }
+  }
+  const { error } = await supabase.from('testimonials').update(t).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteTestimonial(id: string): Promise<void> {
+  const all = await getTestimonials();
+  const existing = all.find(x => x.id === id);
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase.from('testimonials').delete().eq('id', id);
+  if (error) throw error;
+  if (existing?.image_url) {
+    await deleteStorageFile('testimonial_images', existing.image_url);
+  }
+}
+
+// ─── Govt Certificates ───────────────────────────────────────────────────────
+
+export async function getGovtCertificates(): Promise<GovtCertificate[]> {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from('govt_certificates')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching govt certificates:', error);
+    return [];
+  }
+  return data as GovtCertificate[];
+}
+
+export async function createGovtCertificate(c: Omit<GovtCertificate, 'id' | 'created_at'>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase.from('govt_certificates').insert([c]);
+  if (error) throw error;
+}
+
+export async function updateGovtCertificate(id: string, c: Partial<GovtCertificate>): Promise<void> {
+  const supabase = await getSupabaseClient();
+  if (c.image_url) {
+    const all = await getGovtCertificates();
+    const existing = all.find(x => x.id === id);
+    if (existing?.image_url && c.image_url !== existing.image_url) {
+      await deleteStorageFile('govt_cert_images', existing.image_url);
+    }
+  }
+  const { error } = await supabase.from('govt_certificates').update(c).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteGovtCertificate(id: string): Promise<void> {
+  const all = await getGovtCertificates();
+  const existing = all.find(x => x.id === id);
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase.from('govt_certificates').delete().eq('id', id);
+  if (error) throw error;
+  if (existing?.image_url) {
+    await deleteStorageFile('govt_cert_images', existing.image_url);
+  }
+}
+
 // ─── Storage Functions ───────────────────────────────────────────────────────
 
+
+
+export async function deleteStorageFile(bucket: string, fileUrl: string | undefined | null): Promise<void> {
+  if (!fileUrl) return;
+  try {
+    const supabase = await getSupabaseClient();
+    const urlParts = fileUrl.split(`/storage/v1/object/public/${bucket}/`);
+    if (urlParts.length === 2) {
+      const filePath = urlParts[1];
+      await supabase.storage.from(bucket).remove([filePath]);
+    }
+  } catch (error) {
+    console.error(`Failed to delete file from ${bucket}:`, error);
+  }
+}
+
 export async function uploadFile(bucket: string, path: string, file: File): Promise<string> {
+
   const supabase = await getSupabaseClient();
   const { data, error } = await supabase.storage
     .from(bucket)

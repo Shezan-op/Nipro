@@ -82,7 +82,12 @@ export default function AdminCourses() {
       mode: 'Both',
       certification: true,
       status: 'Active',
-      image: ''
+      image: '',
+      rating: '',
+      homepage_cta_text: 'Contact Us',
+      detail_cta_text: 'Enroll Now',
+      show_on_homepage: false,
+      long_description: ''
     });
   };
 
@@ -111,6 +116,15 @@ export default function AdminCourses() {
         finalImage = uploadResult.url;
       } else {
         toast.error('Image upload failed. Using existing image.');
+      }
+    }
+
+    if (formState.show_on_homepage) {
+      const currentFeatured = courses.filter(c => c.show_on_homepage && c.id !== formState.id);
+      if (currentFeatured.length >= 3) {
+        toast.error('You can only feature a maximum of 3 courses on the homepage.');
+        setSaving(false);
+        return;
       }
     }
 
@@ -285,6 +299,44 @@ export default function AdminCourses() {
                 </select>
               </div>
               <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Show on Homepage</label>
+                <select
+                  value={formState?.show_on_homepage ? 'Yes' : 'No'}
+                  onChange={e => setFormState({...formState!, show_on_homepage: e.target.value === 'Yes'})}
+                  className="w-full h-12 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                >
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Rating (e.g. 4.9)</label>
+                <Input 
+                  placeholder="e.g. 4.9"
+                  value={formState?.rating || ''}
+                  onChange={e => setFormState({...formState!, rating: e.target.value})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Homepage CTA Text</label>
+                <Input 
+                  placeholder="e.g. Contact Us"
+                  value={formState?.homepage_cta_text || ''}
+                  onChange={e => setFormState({...formState!, homepage_cta_text: e.target.value})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Detail CTA Text</label>
+                <Input 
+                  placeholder="e.g. Enroll Now"
+                  value={formState?.detail_cta_text || ''}
+                  onChange={e => setFormState({...formState!, detail_cta_text: e.target.value})}
+                  className="h-12 border-gray-200 focus-visible:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Course Image</label>
                 <div className="flex items-center gap-4">
                   <Input 
@@ -326,6 +378,15 @@ export default function AdminCourses() {
                   onChange={e => setFormState({...formState!, description: e.target.value})}
                   maxLength={500}
                   className="w-full min-h-[120px] p-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red"
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-bold text-slate-600 uppercase tracking-wider">Long Description (Course detail page content)</label>
+                <textarea
+                  placeholder="Enter the detailed course overview, curriculum, etc..."
+                  value={formState?.long_description || ''}
+                  onChange={e => setFormState({...formState!, long_description: e.target.value})}
+                  className="w-full min-h-[200px] p-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-nipro-red font-mono"
                 />
               </div>
             </div>

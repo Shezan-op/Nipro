@@ -13,7 +13,10 @@ import {
   LogOut,
   ChevronRight,
   Menu,
-  Percent
+  Percent,
+  Users,
+  MessageSquareQuote,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -23,16 +26,21 @@ const menuItems = [
   { icon: BookOpen, label: 'Courses', href: '/admin/courses' },
   { icon: FileCheck, label: 'Certificates', href: '/admin/certificates' },
   { icon: Newspaper, label: 'Blogs', href: '/admin/blogs' },
+  { icon: Users, label: 'Faculty', href: '/admin/faculty' },
   { icon: Percent, label: 'Discounts', href: '/admin/discounts' },
+  { icon: MessageSquareQuote, label: 'Testimonials', href: '/admin/testimonials' },
+  { icon: ShieldCheck, label: 'Govt Certs', href: '/admin/govt-certificates' },
   { icon: Settings, label: 'Settings', href: '/admin/settings' },
 ];
 
 interface AdminSidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (value: boolean) => void;
+  isMobileOpen?: boolean;
+  setIsMobileOpen?: (value: boolean) => void;
 }
 
-export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSidebarProps) {
+export default function AdminSidebar({ isCollapsed, setIsCollapsed, isMobileOpen }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -44,8 +52,9 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
 
   return (
     <div className={cn(
-      "bg-zinc-50 border-r border-zinc-200/60 h-screen fixed left-0 top-0 text-zinc-900 flex flex-col transition-all duration-300 z-50 shadow-sm",
-      isCollapsed ? "w-16" : "w-64"
+      "bg-zinc-50 border-r border-zinc-200/60 h-screen fixed left-0 top-0 text-zinc-900 flex flex-col transition-transform duration-300 z-50 shadow-sm",
+      isMobileOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0",
+      isCollapsed ? "md:w-16" : "md:w-64"
     )}>
       <div className="p-4 flex items-center justify-between border-b border-zinc-200/50">
         {!isCollapsed && (
@@ -67,7 +76,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
         )}
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)} 
-          className={cn("p-2 rounded-lg hover:bg-zinc-200/60 text-zinc-500 hover:text-zinc-900 transition-colors", isCollapsed && "mx-auto")}
+          className={cn("hidden md:block p-2 rounded-lg hover:bg-zinc-200/60 text-zinc-500 hover:text-zinc-900 transition-colors", isCollapsed && "mx-auto")}
         >
           <Menu className="h-4 w-4" />
         </button>
@@ -92,12 +101,12 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
               >
                 <div className={cn("flex items-center gap-3", isCollapsed && "mx-auto justify-center")}>
                   <Icon className={cn(
-                    "h-4 w-4 transition-transform duration-300",
+                    "h-4 w-4 transition-transform duration-300 shrink-0",
                     isActive ? "text-nipro-blue" : "text-zinc-400 group-hover:scale-105 group-hover:text-zinc-800"
                   )} />
-                  {!isCollapsed && <span>{item.label}</span>}
+                  {(!isCollapsed || isMobileOpen) && <span>{item.label}</span>}
                 </div>
-                {isActive && !isCollapsed && <ChevronRight className="h-3 w-3 text-nipro-blue" />}
+                {isActive && (!isCollapsed || isMobileOpen) && <ChevronRight className="h-3 w-3 text-nipro-blue shrink-0" />}
               </Link>
             );
           })}
@@ -112,8 +121,8 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }: AdminSideb
             isCollapsed && "justify-center"
           )}
         >
-          <LogOut className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-          {!isCollapsed && <span className="font-semibold">Exit Admin</span>}
+          <LogOut className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform shrink-0" />
+          {(!isCollapsed || isMobileOpen) && <span className="font-semibold">Exit Admin</span>}
         </button>
       </div>
     </div>

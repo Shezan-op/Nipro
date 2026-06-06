@@ -39,7 +39,10 @@ export function FeaturedCourses({ courses, discounts, settings }: FeaturedCourse
         </div>
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.slice(0, 3).map((course, index) => (
+          {(courses.filter(c => c.show_on_homepage).length > 0 
+              ? courses.filter(c => c.show_on_homepage) 
+              : courses
+            ).slice(0, 3).map((course, index) => (
             <CourseCard key={course.id} course={course} discounts={discounts} index={index} settings={settings} />
           ))}
         </div>

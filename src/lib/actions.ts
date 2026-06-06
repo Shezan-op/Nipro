@@ -27,6 +27,16 @@ import {
   createFaculty as createFacultyInDb,
   updateFaculty as updateFacultyInDb,
   deleteFaculty as deleteFacultyFromDb,
+  Testimonial,
+  GovtCertificate,
+  getTestimonials as getTestimonialsFromDb,
+  createTestimonial as createTestimonialInDb,
+  updateTestimonial as updateTestimonialInDb,
+  deleteTestimonial as deleteTestimonialFromDb,
+  getGovtCertificates as getGovtCertsFromDb,
+  createGovtCertificate as createGovtCertInDb,
+  updateGovtCertificate as updateGovtCertInDb,
+  deleteGovtCertificate as deleteGovtCertFromDb,
   Certificate, 
   Course, 
   BlogPost, 
@@ -348,7 +358,7 @@ export async function uploadFileAction(bucket: string, fileName: string, formDat
     }
 
     // Validate bucket name to only allow known buckets
-    const allowedBuckets = ['certificates', 'blogs', 'course_images', 'blog_images', 'faculty_images'];
+    const allowedBuckets = ['certificates', 'blogs', 'course_images', 'blog_images', 'faculty_images', 'testimonial_images', 'govt_cert_images'];
     if (!allowedBuckets.includes(bucket)) {
       throw new Error(`Invalid bucket: ${bucket}`);
     }
@@ -427,5 +437,101 @@ export async function deleteFacultyAction(id: string) {
   } catch (error) {
     console.error('Failed to delete faculty:', error);
     return { success: false, error: 'Failed to delete faculty' };
+  }
+}
+
+// ─── Testimonials Actions ───────────────────────────────────────────────────
+
+export async function getTestimonialsAction() {
+  try {
+    const data = await getTestimonialsFromDb();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to get testimonials:', error);
+    return { success: false, error: 'Failed to fetch testimonials' };
+  }
+}
+
+export async function createTestimonialAction(t: Omit<Testimonial, 'id' | 'created_at'>) {
+  try {
+    await checkAuth();
+    await createTestimonialInDb(t);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to create testimonial:', error);
+    return { success: false, error: 'Failed to create testimonial' };
+  }
+}
+
+export async function updateTestimonialAction(id: string, t: Partial<Testimonial>) {
+  try {
+    await checkAuth();
+    await updateTestimonialInDb(id, t);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update testimonial:', error);
+    return { success: false, error: 'Failed to update testimonial' };
+  }
+}
+
+export async function deleteTestimonialAction(id: string) {
+  try {
+    await checkAuth();
+    await deleteTestimonialFromDb(id);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete testimonial:', error);
+    return { success: false, error: 'Failed to delete testimonial' };
+  }
+}
+
+// ─── Govt Certificates Actions ──────────────────────────────────────────────
+
+export async function getGovtCertificatesAction() {
+  try {
+    const data = await getGovtCertsFromDb();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Failed to get govt certificates:', error);
+    return { success: false, error: 'Failed to fetch govt certificates' };
+  }
+}
+
+export async function createGovtCertificateAction(c: Omit<GovtCertificate, 'id' | 'created_at'>) {
+  try {
+    await checkAuth();
+    await createGovtCertInDb(c);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to create govt certificate:', error);
+    return { success: false, error: 'Failed to create govt certificate' };
+  }
+}
+
+export async function updateGovtCertificateAction(id: string, c: Partial<GovtCertificate>) {
+  try {
+    await checkAuth();
+    await updateGovtCertInDb(id, c);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update govt certificate:', error);
+    return { success: false, error: 'Failed to update govt certificate' };
+  }
+}
+
+export async function deleteGovtCertificateAction(id: string) {
+  try {
+    await checkAuth();
+    await deleteGovtCertFromDb(id);
+    revalidatePath('/', 'layout');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete govt certificate:', error);
+    return { success: false, error: 'Failed to delete govt certificate' };
   }
 }
